@@ -1,0 +1,5 @@
+org\example\study\baseSdk\chain\ChainRuntimeTests.class
+org\example\study\baseSdk\chain\TestFinallyHandler.class
+org\example\study\baseSdk\chain\TestMiddleHandler.class
+org\example\study\baseSdk\chain\TestStartHandler.class
+org\example\study\StudyApplicationTests.class
