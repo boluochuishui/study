@@ -1,30 +1,21 @@
 package org.example.study.baseSdk.log;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Default log recorder backed by SLF4J.
+ * 默认业务日志门面，底层委托给通用日志记录器。
  */
 @Component
 public class DefaultBizLogRecorder implements BizLogRecorder {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultBizLogRecorder.class);
+    private final LogRecorder logRecorder;
+
+    public DefaultBizLogRecorder(LogRecorder logRecorder) {
+        this.logRecorder = logRecorder;
+    }
 
     @Override
     public void record(BizLogEvent event) {
-        log.info(
-                "biz_event traceId={} taskId={} appId={} sceneCode={} eventType={} success={} costMillis={} message={} attributes={}",
-                event.traceId(),
-                event.taskId(),
-                event.appId(),
-                event.sceneCode(),
-                event.eventType(),
-                event.success(),
-                event.costMillis(),
-                event.message(),
-                event.attributes()
-        );
+        logRecorder.record(event.toBaseLogEvent());
     }
 }

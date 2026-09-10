@@ -6,6 +6,7 @@ Each requirement owns a numbered folder:
 
 ```text
 004-multimedia-detect-chains
+005-extensible-base-log-module
 ```
 
 Every folder should contain:
@@ -22,3 +23,4 @@ verification.md  Test cases and validation results
 | ID | Name | Status |
 | --- | --- | --- |
 | 004 | Multimedia Detect Chains | Implemented |
+| 005 | Extensible Base Log Module | Implemented |

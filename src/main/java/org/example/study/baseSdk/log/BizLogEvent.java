@@ -4,13 +4,15 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * Structured business log event emitted by platform components.
+ * 业务日志事件，用于保留业务层的日志门面。
  */
 public record BizLogEvent(
+        String logSpace,
         String traceId,
         String taskId,
         String appId,
         String sceneCode,
+        String source,
         String eventType,
         String message,
         boolean success,
@@ -18,4 +20,30 @@ public record BizLogEvent(
         Map<String, Object> attributes,
         Instant occurredAt
 ) {
+
+    public BizLogEvent {
+        logSpace = logSpace == null || logSpace.isBlank() ? "biz" : logSpace;
+        source = source == null ? "" : source;
+        attributes = attributes == null ? Map.of() : Map.copyOf(attributes);
+        occurredAt = occurredAt == null ? Instant.now() : occurredAt;
+    }
+
+    public BaseLogEvent toBaseLogEvent() {
+        return new BaseLogEvent(
+                logSpace,
+                LogType.BIZ,
+                LogLevel.INFO,
+                traceId,
+                taskId,
+                appId,
+                sceneCode,
+                source,
+                eventType,
+                message,
+                success,
+                costMillis,
+                attributes,
+                occurredAt
+        );
+    }
 }

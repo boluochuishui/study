@@ -6,8 +6,10 @@ import org.example.study.baseSdk.chain.ChainExecuteResult;
 import org.example.study.baseSdk.chain.ChainExecutionListener;
 import org.example.study.baseSdk.chain.ChainHandlerDefinition;
 import org.example.study.baseSdk.chain.ChainNodeResult;
-import org.example.study.baseSdk.log.BizLogEvent;
-import org.example.study.baseSdk.log.BizLogRecorder;
+import org.example.study.baseSdk.log.BaseLogEvent;
+import org.example.study.baseSdk.log.LogLevel;
+import org.example.study.baseSdk.log.LogRecorder;
+import org.example.study.baseSdk.log.LogType;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -15,15 +17,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Emits structured logs for chain lifecycle and handler lifecycle events.
+ * 记录责任链生命周期和节点生命周期的结构化日志。
  */
 @Component
 public class BizLogChainExecutionListener implements ChainExecutionListener<ChainContext> {
 
-    private final BizLogRecorder bizLogRecorder;
+    private final LogRecorder logRecorder;
 
-    public BizLogChainExecutionListener(BizLogRecorder bizLogRecorder) {
-        this.bizLogRecorder = bizLogRecorder;
+    public BizLogChainExecutionListener(LogRecorder logRecorder) {
+        this.logRecorder = logRecorder;
     }
 
     @Override
@@ -53,11 +55,15 @@ public class BizLogChainExecutionListener implements ChainExecutionListener<Chai
 
     private void record(ChainContext context, String eventType, String message, boolean success, long costMillis, Map<String, Object> attributes) {
         var logContext = context.logContext();
-        bizLogRecorder.record(new BizLogEvent(
+        logRecorder.record(new BaseLogEvent(
+                logContext.logSpace(),
+                LogType.CHAIN,
+                success ? LogLevel.INFO : LogLevel.WARN,
                 logContext.traceId(),
                 logContext.taskId(),
                 logContext.appId(),
                 logContext.sceneCode(),
+                logContext.chainName(),
                 eventType,
                 message,
                 success,

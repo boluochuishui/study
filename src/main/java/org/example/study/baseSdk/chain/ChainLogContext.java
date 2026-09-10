@@ -3,9 +3,10 @@ package org.example.study.baseSdk.chain;
 import java.util.Map;
 
 /**
- * Carries trace fields that should appear on every chain and handler log event.
+ * 责任链日志上下文，承载整条链路都需要透传的日志字段。
  */
 public record ChainLogContext(
+        String logSpace,
         String traceId,
         String taskId,
         String appId,
@@ -16,14 +17,18 @@ public record ChainLogContext(
 ) {
 
     public static ChainLogContext empty(String traceId, String taskId) {
-        return new ChainLogContext(traceId, taskId, "", "", "", "", Map.of());
+        return new ChainLogContext("content-risk", traceId, taskId, "", "", "", "", Map.of());
+    }
+
+    public ChainLogContext withLogSpace(String logSpace) {
+        return new ChainLogContext(logSpace, traceId, taskId, appId, sceneCode, chainName, chainVersion, attributes);
     }
 
     public ChainLogContext withCaller(String appId, String sceneCode) {
-        return new ChainLogContext(traceId, taskId, appId, sceneCode, chainName, chainVersion, attributes);
+        return new ChainLogContext(logSpace, traceId, taskId, appId, sceneCode, chainName, chainVersion, attributes);
     }
 
     public ChainLogContext withChain(String chainName, String chainVersion) {
-        return new ChainLogContext(traceId, taskId, appId, sceneCode, chainName, chainVersion, attributes);
+        return new ChainLogContext(logSpace, traceId, taskId, appId, sceneCode, chainName, chainVersion, attributes);
     }
 }
