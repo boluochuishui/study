@@ -7,6 +7,7 @@ Each requirement owns a numbered folder:
 ```text
 004-multimedia-detect-chains
 005-extensible-base-log-module
+006-base-character-module
 ```
 
 Every folder should contain:
@@ -24,3 +25,4 @@ verification.md  Test cases and validation results
 | --- | --- | --- |
 | 004 | Multimedia Detect Chains | Implemented |
 | 005 | Extensible Base Log Module | Implemented |
+| 006 | Base Character Module | Implemented |

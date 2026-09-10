@@ -1,5 +1,7 @@
 package org.example.study.baseSdk.log;
 
+import org.apache.logging.log4j.util.Strings;
+
 import java.time.Instant;
 import java.util.Map;
 
@@ -23,7 +25,7 @@ public record BizLogEvent(
 
     public BizLogEvent {
         logSpace = logSpace == null || logSpace.isBlank() ? "biz" : logSpace;
-        source = source == null ? "" : source;
+        source = source == null ? Strings.EMPTY : source;
         attributes = attributes == null ? Map.of() : Map.copyOf(attributes);
         occurredAt = occurredAt == null ? Instant.now() : occurredAt;
     }
