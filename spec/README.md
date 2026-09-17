@@ -8,6 +8,7 @@ Each requirement owns a numbered folder:
 004-multimedia-detect-chains
 005-extensible-base-log-module
 006-base-character-module
+007-configurable-auth-routing
 ```
 
 Every folder should contain:
@@ -26,3 +27,4 @@ verification.md  Test cases and validation results
 | 004 | Multimedia Detect Chains | Implemented |
 | 005 | Extensible Base Log Module | Implemented |
 | 006 | Base Character Module | Implemented |
+| 007 | Configurable Auth Routing | Designed |
