@@ -31,6 +31,13 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 study:
+  auth:
+    # 本地演示凭证通过环境变量覆盖，生产环境应替换为数据库加密凭证源或 STS。
+    app-id: ${AUTH_APP_ID:demo-app}
+    app-secret: ${AUTH_APP_SECRET:demo-secret}
+    clock-skew-seconds: ${AUTH_CLOCK_SKEW_SECONDS:300}
+    nonce-ttl-seconds: ${AUTH_NONCE_TTL_SECONDS:600}
+    refresh-delay-millis: ${AUTH_REFRESH_DELAY_MILLIS:30000}
   detect:
     async:
       # 本地默认只记录消息；生产环境设置为 rocketmq，并通过环境变量提供连接信息。

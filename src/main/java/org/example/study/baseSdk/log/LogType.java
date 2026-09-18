@@ -8,5 +8,6 @@ public enum LogType {
     DEBUG,
     THIRD_PARTY,
     CHAIN,
+    AUTH,
     BIZ
 }

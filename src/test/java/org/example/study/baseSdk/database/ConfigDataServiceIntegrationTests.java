@@ -2,6 +2,8 @@ package org.example.study.baseSdk.database;
 
 import org.example.study.baseSdk.database.api.model.SaveConfigItemCommand;
 import org.example.study.baseSdk.database.api.service.ConfigDataService;
+import org.example.study.baseSdk.auth.AuthMode;
+import org.example.study.baseSdk.auth.DatabaseAuthConfigSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ class ConfigDataServiceIntegrationTests {
     @Autowired
     private ConfigDataService configDataService;
 
+    @Autowired
+    private DatabaseAuthConfigSource authConfigSource;
+
     @Test
     void savesQueriesAndDisablesConfigItem() {
         var saved = configDataService.save(new SaveConfigItemCommand(
@@ -38,5 +43,18 @@ class ConfigDataServiceIntegrationTests {
         assertThat(configDataService.listEnabled(NAMESPACE)).extracting("configKey").contains(CONFIG_KEY);
         assertThat(configDataService.disable(NAMESPACE, CONFIG_KEY)).isTrue();
         assertThat(configDataService.findEnabled(NAMESPACE, CONFIG_KEY)).isEmpty();
+    }
+
+    @Test
+    void readsSeededAuthenticationSnapshot() {
+        var snapshot = authConfigSource.loadLatest();
+
+        assertThat(snapshot).isPresent();
+        assertThat(snapshot.orElseThrow().version()).isEqualTo("db-v1");
+        assertThat(snapshot.orElseThrow().rules())
+                .anySatisfy(rule -> {
+                    assertThat(rule.ruleId()).isEqualTo("detect-sync");
+                    assertThat(rule.authMode()).isEqualTo(AuthMode.SIGNATURE);
+                });
     }
 }

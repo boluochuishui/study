@@ -22,8 +22,8 @@ sequenceDiagram
     participant Registry as ChainHandlerRegistry
     participant Validator as ChainDefinitionValidator
     participant Repo as ChainDefinitionRepository
+    participant Auth as AuthenticationFilter
     participant Api as DetectController
-    participant Auth as ApiSignatureVerifier
     participant Service as DetectService
     participant Runtime as ChainRuntime
     participant Executor as ChainExecutor
@@ -47,9 +47,9 @@ sequenceDiagram
     end
 
     rect rgb(250, 247, 240)
-        Note over Api,ExHandler: 请求执行阶段：按内容类型选择链并执行
-        Api->>Auth: 校验 appId、timestamp、nonce、signature
-        Auth-->>Api: 校验通过
+        Note over Auth,ExHandler: 请求执行阶段：系统鉴权后按内容类型选择链并执行
+        Auth->>Auth: 匹配 URL 规则并校验 HMAC 签名
+        Auth->>Api: 写入 AuthenticationContext 后放行
         Api->>Service: 提交 DetectRequest
         Service->>Service: 构建 DetectContext，写入 taskId、traceId、contentType、日志上下文
         Service->>Runtime: execute(chainName, DetectContext)

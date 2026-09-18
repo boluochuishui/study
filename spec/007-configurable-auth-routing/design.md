@@ -193,11 +193,34 @@ GET /actuator/health/readiness -> ANONYMOUS
 
 ## 与现有代码的迁移关系
 
-后续实现时按以下顺序迁移：
+本期已按以下顺序完成迁移：
 
-1. 在 `baseSdk` 中建立鉴权模型、Provider 接口和统一异常。
-2. 将现有 `ApiSignatureVerifier` 封装进 `SIGNATURE` Provider。
-3. 新增规则匹配器和本地快照，不立即移除 Controller 手动验签。
-4. 接入 `AuthFilter` 并完成双轨验证。
-5. 验证稳定后移除 Controller 中的显式验签调用。
-6. 管理台完成后接入 `AuthConfigSource`、发布和回滚流程。
+1. 在 `baseSdk.auth` 中建立协议无关模型、Provider 接口和统一异常。
+2. 使用 `SIGNATURE` Provider 替换与检测 DTO 耦合的旧验签器。
+3. 启动时安装最小引导快照，定时读取数据库中的完整发布快照。
+4. 接入 `AuthenticationFilter` 并缓存原始请求体。
+5. 移除 Controller 中的显式验签调用，从认证上下文取得 appId。
+6. 管理台完成后写入相同的 `system-auth/published-rules` 配置项。
+
+检测接口需要分别配置同步提交、异步提交和异步结果查询规则。即使三者初期都使用 `SIGNATURE`，也应保留独立规则，以便分别配置权限点、限流配额和后续鉴权策略。
+
+## 签名协议
+
+签名原文不依赖业务 DTO，按以下字段及换行符拼接：
+
+```text
+HTTP_METHOD
+NORMALIZED_PATH
+APP_ID
+TIMESTAMP
+NONCE
+SHA256_HEX(RAW_BODY)
+```
+
+客户端使用 `HMAC-SHA256` 计算小写十六进制签名。查询字符串不参与签名；时间戳使用 Unix 秒。服务端先验签再原子占用 nonce，非法请求不会污染防重放存储。
+
+## 凭证与 RPC 演进
+
+`CredentialProvider` 隔离凭证来源。个人开发阶段由环境变量提供凭证，后续可增加数据库密文、KMS 或 STS 实现。`AuthenticationRequest` 不依赖 Servlet；升级 gRPC 或 Dubbo 时，仅需在对应 Interceptor/Filter 中把 Metadata 或 Attachment 转换为该模型。
+
+当前 `InMemoryNonceStore` 仅适用于单实例。多实例部署必须增加 Redis 实现，通过 `SET key value NX EX` 一类原子语义实现全局防重放。

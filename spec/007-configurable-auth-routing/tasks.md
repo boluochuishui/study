@@ -11,13 +11,13 @@
 
 ## 后续阶段：基础鉴权模块
 
-- [ ] 新增鉴权领域模型和统一异常体系。
-- [ ] 实现 `AuthenticationProvider` 注册与路由。
-- [ ] 实现 `AuthRuleMatcher` 和规则启动校验。
-- [ ] 将 HMAC-SHA256 验签迁移为 `SIGNATURE` Provider。
-- [ ] 实现防重放、认证上下文和结构化鉴权日志。
-- [ ] 接入 `AuthFilter` 并移除 Controller 手动验签。
-- [ ] 补充单元测试、集成测试和安全边界测试。
+- [x] 新增鉴权领域模型和统一异常体系。
+- [x] 实现 `AuthenticationProvider` 注册与路由。
+- [x] 实现 `AuthRuleMatcher` 和规则启动校验。
+- [x] 将 HMAC-SHA256 验签迁移为 `SIGNATURE` Provider。
+- [x] 实现防重放、认证上下文和结构化鉴权日志。
+- [x] 接入 `AuthFilter` 并移除 Controller 手动验签。
+- [x] 补充签名、防篡改、防重放和规则匹配测试。
 
 ## 后续阶段：管理台接入
 
