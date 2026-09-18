@@ -37,6 +37,7 @@ study:
     app-secret: ${AUTH_APP_SECRET:demo-secret}
     clock-skew-seconds: ${AUTH_CLOCK_SKEW_SECONDS:300}
     nonce-ttl-seconds: ${AUTH_NONCE_TTL_SECONDS:600}
+    max-body-bytes: ${AUTH_MAX_BODY_BYTES:5242880}
     refresh-delay-millis: ${AUTH_REFRESH_DELAY_MILLIS:30000}
   detect:
     async:
