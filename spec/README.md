@@ -9,6 +9,8 @@ Each requirement owns a numbered folder:
 005-extensible-base-log-module
 006-base-character-module
 007-configurable-auth-routing
+008-sync-async-detect-api
+009-mysql-config-database-sdk
 ```
 
 Every folder should contain:
@@ -28,3 +30,5 @@ verification.md  Test cases and validation results
 | 005 | Extensible Base Log Module | Implemented |
 | 006 | Base Character Module | Implemented |
 | 007 | Configurable Auth Routing | Designed |
+| 008 | Sync And Async Detect API | Implemented |
+| 009 | MySQL Config Database SDK | Implemented |

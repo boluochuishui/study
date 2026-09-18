@@ -7,18 +7,25 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * API response returned after a moderation chain finishes.
+ * 同步检测的对外结果，不暴露责任链节点等内部执行过程。
  */
 public record DetectResult(
         String taskId,
-        String chainName,
+        DetectStatus detectStatus,
         DetectAction action,
         List<String> labels,
-        List<ChainNodeResult> nodeResults,
-        long costMillis
+        boolean degraded,
+        String errorCode,
+        String errorMessage
 ) {
 
-    public static DetectResult from(ChainExecuteResult chainResult) {
+    public DetectResult {
+        labels = labels == null ? List.of() : List.copyOf(labels);
+        errorCode = errorCode == null ? "" : errorCode;
+        errorMessage = errorMessage == null ? "" : errorMessage;
+    }
+
+    public static DetectResult success(ChainExecuteResult chainResult) {
         List<String> labels = chainResult.nodeResults().stream()
                 .flatMap(result -> result.tags().stream())
                 .distinct()
@@ -27,7 +34,11 @@ public record DetectResult(
                 .map(DetectResult::actionOf)
                 .max(Comparator.comparingInt(Enum::ordinal))
                 .orElse(DetectAction.PASS);
-        return new DetectResult(chainResult.taskId(), chainResult.chainName(), action, labels, chainResult.nodeResults(), chainResult.costMillis());
+        return new DetectResult(chainResult.taskId(), DetectStatus.SUCCEEDED, action, labels, false, "", "");
+    }
+
+    public static DetectResult degradedPass(String taskId, String errorCode, String errorMessage) {
+        return new DetectResult(taskId, DetectStatus.FAILED, DetectAction.PASS, List.of(), true, errorCode, errorMessage);
     }
 
     private static DetectAction actionOf(ChainNodeResult result) {

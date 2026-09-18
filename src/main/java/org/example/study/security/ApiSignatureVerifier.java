@@ -50,7 +50,7 @@ public class ApiSignatureVerifier {
         return "appId=" + safe(appId)
                 + "&timestamp=" + safe(timestamp)
                 + "&nonce=" + safe(nonce)
-                + "&taskId=" + safe(request.taskId())
+                + "&clientRequestId=" + safe(request.clientRequestId())
                 + "&sceneCode=" + safe(request.sceneCode())
                 + "&contentType=" + safe(request.contentType())
                 + "&text=" + safe(request.text())

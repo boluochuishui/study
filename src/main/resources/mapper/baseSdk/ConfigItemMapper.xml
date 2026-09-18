@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.study.baseSdk.database.mybatis.mapper.ConfigItemMapper">
+
+    <resultMap id="configItemResultMap"
+               type="org.example.study.baseSdk.database.mybatis.entity.ConfigItemEntity">
+        <id property="id" column="id"/>
+        <result property="namespace" column="namespace"/>
+        <result property="configKey" column="config_key"/>
+        <result property="configValue" column="config_value"/>
+        <result property="version" column="version"/>
+        <result property="enabled" column="enabled"/>
+        <result property="description" column="description"/>
+        <result property="deleted" column="deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="configItemColumns">
+        id, namespace, config_key, config_value, version, enabled,
+        description, deleted, created_at, updated_at
+    </sql>
+
+    <select id="selectEnabled" resultMap="configItemResultMap">
+        SELECT
+        <include refid="configItemColumns"/>
+        FROM sdk_config_item
+        WHERE namespace = #{namespace}
+          AND config_key = #{configKey}
+          AND enabled = 1
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectAny" resultMap="configItemResultMap">
+        SELECT
+        <include refid="configItemColumns"/>
+        FROM sdk_config_item
+        WHERE namespace = #{namespace}
+          AND config_key = #{configKey}
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectEnabledList" resultMap="configItemResultMap">
+        SELECT
+        <include refid="configItemColumns"/>
+        FROM sdk_config_item
+        WHERE namespace = #{namespace}
+          AND enabled = 1
+          AND deleted = 0
+        ORDER BY config_key ASC
+        LIMIT 500
+    </select>
+</mapper>

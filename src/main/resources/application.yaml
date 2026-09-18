@@ -1,3 +1,44 @@
 spring:
   application:
     name: study
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:content_risk}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: content-risk-database-pool
+      minimum-idle: 1
+      maximum-pool-size: 10
+      connection-timeout: 3000
+  flyway:
+    enabled: ${MYSQL_MIGRATION_ENABLED:false}
+    locations: classpath:db/migration
+    validate-migration-naming: true
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: org.example.study.baseSdk.database.mybatis.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+study:
+  detect:
+    async:
+      # 本地默认只记录消息；生产环境设置为 rocketmq，并通过环境变量提供连接信息。
+      publisher: ${DETECT_ASYNC_PUBLISHER:logging}
+      rocketmq:
+        endpoints: ${ROCKETMQ_ENDPOINTS:}
+        access-key: ${ROCKETMQ_ACCESS_KEY:}
+        secret-key: ${ROCKETMQ_SECRET_KEY:}
+        task-topic: ${ROCKETMQ_TASK_TOPIC:content-detect-task}
+        consumer-group: ${ROCKETMQ_CONSUMER_GROUP:content-detect-worker}
+        result-topic-prefix: ${ROCKETMQ_RESULT_TOPIC_PREFIX:detect-result-}

@@ -23,8 +23,8 @@ public class DetectContext extends ChainContext {
     private final String videoUrl;
     private final List<String> derivedTexts = new ArrayList<>();
 
-    public DetectContext(String traceId, String appId, DetectRequest request) {
-        super(traceId, request.taskId());
+    public DetectContext(String traceId, String taskId, String appId, DetectRequest request) {
+        super(traceId, taskId);
         this.appId = appId;
         this.sceneCode = request.sceneCode();
         this.contentType = ContentType.from(request.contentType());
