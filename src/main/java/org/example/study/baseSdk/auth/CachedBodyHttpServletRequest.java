@@ -19,9 +19,12 @@ public class CachedBodyHttpServletRequest extends HttpServletRequestWrapper {
 
     private final byte[] body;
 
-    public CachedBodyHttpServletRequest(HttpServletRequest request) throws IOException {
+    public CachedBodyHttpServletRequest(HttpServletRequest request, int maxBodyBytes) throws IOException {
         super(request);
-        this.body = request.getInputStream().readAllBytes();
+        this.body = request.getInputStream().readNBytes(maxBodyBytes + 1);
+        if (body.length > maxBodyBytes) {
+            throw new AuthenticationException("REQUEST_BODY_TOO_LARGE", "Request body is too large", 413);
+        }
     }
 
     public byte[] body() {

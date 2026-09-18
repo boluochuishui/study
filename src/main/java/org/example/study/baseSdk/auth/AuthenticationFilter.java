@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.study.api.ApiErrorResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -26,17 +27,20 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
     private final AuthenticationLogRecorder authenticationLogRecorder;
     private final ObjectMapper objectMapper;
+    private final int maxBodyBytes;
 
     public AuthenticationFilter(
             AuthRuleMatcher ruleMatcher,
             AuthenticationManager authenticationManager,
             AuthenticationLogRecorder authenticationLogRecorder,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            @Value("${study.auth.max-body-bytes:5242880}") int maxBodyBytes
     ) {
         this.ruleMatcher = ruleMatcher;
         this.authenticationManager = authenticationManager;
         this.authenticationLogRecorder = authenticationLogRecorder;
         this.objectMapper = objectMapper;
+        this.maxBodyBytes = maxBodyBytes;
     }
 
     @Override
@@ -46,12 +50,13 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         String traceId = Optional.ofNullable(servletRequest.getHeader("X-Trace-Id"))
                 .filter(value -> !value.isBlank())
                 .orElseGet(() -> UUID.randomUUID().toString());
-        CachedBodyHttpServletRequest request = new CachedBodyHttpServletRequest(servletRequest);
-        String path = normalizedPath(request);
-        AuthRule rule = ruleMatcher.match(request.getMethod(), path).orElse(null);
-        String appId = valueOrEmpty(request.getHeader("X-App-Id"));
+        AuthRule rule = null;
+        String appId = valueOrEmpty(servletRequest.getHeader("X-App-Id"));
 
         try {
+            CachedBodyHttpServletRequest request = new CachedBodyHttpServletRequest(servletRequest, maxBodyBytes);
+            String path = normalizedPath(request);
+            rule = ruleMatcher.match(request.getMethod(), path).orElse(null);
             if (rule == null) {
                 throw new AuthenticationException("AUTH_RULE_NOT_MATCHED", "Authentication rule was not matched", 403);
             }
