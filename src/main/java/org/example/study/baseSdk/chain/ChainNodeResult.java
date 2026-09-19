@@ -18,6 +18,11 @@ public record ChainNodeResult(
         long costMillis
 ) {
 
+    public ChainNodeResult {
+        tags = tags == null ? List.of() : List.copyOf(tags);
+        details = details == null ? Map.of() : Map.copyOf(details);
+    }
+
     public static ChainNodeResult success(String handlerName, long costMillis) {
         return new ChainNodeResult(handlerName, "EXECUTE", true, false, "SUCCESS", "success", List.of(), Map.of(), costMillis);
     }

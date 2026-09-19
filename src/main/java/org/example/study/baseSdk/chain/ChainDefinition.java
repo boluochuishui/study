@@ -14,4 +14,8 @@ public record ChainDefinition(
         List<ChainHandlerDefinition> executeHandlers,
         ChainHandlerDefinition finallyHandler
 ) {
+
+    public ChainDefinition {
+        executeHandlers = executeHandlers == null ? List.of() : List.copyOf(executeHandlers);
+    }
 }

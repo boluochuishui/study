@@ -16,6 +16,10 @@ public record ChainLogContext(
         Map<String, Object> attributes
 ) {
 
+    public ChainLogContext {
+        attributes = attributes == null ? Map.of() : Map.copyOf(attributes);
+    }
+
     public static ChainLogContext empty(String traceId, String taskId) {
         return new ChainLogContext("content-risk", traceId, taskId, "", "", "", "", Map.of());
     }

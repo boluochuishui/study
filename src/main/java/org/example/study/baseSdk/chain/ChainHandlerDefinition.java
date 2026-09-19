@@ -12,7 +12,11 @@ public record ChainHandlerDefinition(
         Map<String, String> properties
 ) {
 
+    public ChainHandlerDefinition {
+        properties = properties == null ? Map.of() : Map.copyOf(properties);
+    }
+
     public String property(String key, String defaultValue) {
-        return properties == null ? defaultValue : properties.getOrDefault(key, defaultValue);
+        return properties.getOrDefault(key, defaultValue);
     }
 }

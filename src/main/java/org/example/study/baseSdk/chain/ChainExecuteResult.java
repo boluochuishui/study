@@ -16,6 +16,10 @@ public record ChainExecuteResult(
         long costMillis
 ) {
 
+    public ChainExecuteResult {
+        nodeResults = nodeResults == null ? List.of() : List.copyOf(nodeResults);
+    }
+
     public static ChainExecuteResult from(ChainContext context, List<ChainNodeResult> nodeResults, Instant endedAt) {
         boolean success = nodeResults.stream().allMatch(ChainNodeResult::success);
         return new ChainExecuteResult(

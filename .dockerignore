@@ -1,0 +1,10 @@
+.git
+.github
+.idea
+spec
+src
+config
+*.iml
+*.log
+target/*
+!target/*.jar

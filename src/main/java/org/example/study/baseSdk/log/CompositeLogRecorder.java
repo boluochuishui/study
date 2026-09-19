@@ -15,7 +15,7 @@ public class CompositeLogRecorder implements LogRecorder {
     private final List<LogSink> logSinks;
 
     public CompositeLogRecorder(List<LogSink> logSinks) {
-        this.logSinks = logSinks;
+        this.logSinks = List.copyOf(logSinks);
     }
 
     @Override

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Spring 单例依赖由容器管理，不属于对外暴露的可变领域状态。 -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Field name="objectMapper"/>
+    </Match>
+
+    <!-- 构造失败由 Spring 启动过程处理，相关 Bean 不定义 finalizer。 -->
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+</FindBugsFilter>
