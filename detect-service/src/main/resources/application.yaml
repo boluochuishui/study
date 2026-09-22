@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: study
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:content_risk}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: content-risk-database-pool
+      minimum-idle: 1
+      maximum-pool-size: 10
+      connection-timeout: 3000
+  flyway:
+    enabled: ${MYSQL_MIGRATION_ENABLED:false}
+    locations: classpath:db/migration
+    validate-migration-naming: true
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: org.example.study.baseSdk.database.mybatis.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+base-sdk:
+  hotload:
+    poll-interval-ms: ${HOTLOAD_POLL_INTERVAL_MS:30000}
+    full-refresh-interval-millis: ${HOTLOAD_FULL_REFRESH_INTERVAL_MS:3600000}
+    batch-size: ${HOTLOAD_BATCH_SIZE:500}
+  thread-pool:
+    defaults:
+      core-pool-size: ${THREAD_POOL_CORE_SIZE:4}
+      maximum-pool-size: ${THREAD_POOL_MAX_SIZE:8}
+      queue-capacity: ${THREAD_POOL_QUEUE_CAPACITY:1000}
+      keep-alive-seconds: ${THREAD_POOL_KEEP_ALIVE_SECONDS:60}
+      await-termination-seconds: ${THREAD_POOL_AWAIT_TERMINATION_SECONDS:30}
+      allow-core-thread-timeout: false
+    pools:
+      detect-async:
+        core-pool-size: ${DETECT_ASYNC_CORE_SIZE:8}
+        maximum-pool-size: ${DETECT_ASYNC_MAX_SIZE:32}
+        queue-capacity: ${DETECT_ASYNC_QUEUE_CAPACITY:1000}
+
+study:
+  auth:
+    # 本地演示凭证通过环境变量覆盖，生产环境应替换为数据库加密凭证源或 STS。
+    app-id: ${AUTH_APP_ID:demo-app}
+    app-secret: ${AUTH_APP_SECRET:demo-secret}
+    clock-skew-seconds: ${AUTH_CLOCK_SKEW_SECONDS:300}
+    nonce-ttl-seconds: ${AUTH_NONCE_TTL_SECONDS:600}
+    max-body-bytes: ${AUTH_MAX_BODY_BYTES:5242880}
+    refresh-delay-millis: ${AUTH_REFRESH_DELAY_MILLIS:30000}
+  detect:
+    async:
+      # 本地默认只记录消息；生产环境设置为 rocketmq，并通过环境变量提供连接信息。
+      publisher: ${DETECT_ASYNC_PUBLISHER:logging}
+      rocketmq:
+        endpoints: ${ROCKETMQ_ENDPOINTS:}
+        access-key: ${ROCKETMQ_ACCESS_KEY:}
+        secret-key: ${ROCKETMQ_SECRET_KEY:}
+        task-topic: ${ROCKETMQ_TASK_TOPIC:content-detect-task}
+        consumer-group: ${ROCKETMQ_CONSUMER_GROUP:content-detect-worker}
+        result-topic-prefix: ${ROCKETMQ_RESULT_TOPIC_PREFIX:detect-result-}

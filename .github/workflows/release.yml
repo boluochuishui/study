@@ -41,7 +41,7 @@ jobs:
       - name: Set release version
         env:
           RELEASE_VERSION: ${{ inputs.version }}
-        run: mvn --batch-mode --no-transfer-progress versions:set "-DnewVersion=$RELEASE_VERSION" -DgenerateBackupPoms=false
+        run: mvn --batch-mode --no-transfer-progress versions:set "-DnewVersion=$RELEASE_VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
 
       - name: Run tests and quality checks
         run: mvn --batch-mode --no-transfer-progress clean verify
@@ -53,11 +53,12 @@ jobs:
           if-no-files-found: error
           retention-days: 30
           path: |
-            target/study-${{ inputs.version }}.jar
-            target/surefire-reports/
-            target/checkstyle-*.xml
-            target/spotbugsXml.xml
-            target/site/jacoco/
+            detect-service/target/study-detect-service-${{ inputs.version }}.jar
+            admin-service/target/study-admin-service-${{ inputs.version }}.jar
+            **/target/surefire-reports/
+            **/target/checkstyle-*.xml
+            **/target/spotbugsXml.xml
+            **/target/site/jacoco/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -68,5 +69,15 @@ jobs:
           context: .
           push: false
           tags: study:${{ inputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build admin Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: admin-service/Dockerfile
+          push: false
+          tags: study-admin:${{ inputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

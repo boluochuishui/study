@@ -41,7 +41,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
           path: |
-            target/surefire-reports/
-            target/checkstyle-*.xml
-            target/spotbugsXml.xml
-            target/site/jacoco/
+            **/target/surefire-reports/
+            **/target/checkstyle-*.xml
+            **/target/spotbugsXml.xml
+            **/target/site/jacoco/

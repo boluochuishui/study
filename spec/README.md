@@ -14,6 +14,10 @@ Each requirement owns a numbered folder:
 010-github-actions-pipeline
 011-managed-thread-pool
 012-modality-package-async-execution
+013-request-header-app-id
+014-scheduled-hotload-framework
+015-maven-module-split
+016-admin-config-service
 ```
 
 Every folder should contain:
@@ -38,3 +42,7 @@ verification.md  Test cases and validation results
 | 010 | GitHub Actions Pipeline | Implemented |
 | 011 | Managed Thread Pool Factory | Implemented |
 | 012 | Modality Package And Async Execution | Implemented |
+| 013 | Request Header App ID | Implemented |
+| 014 | Scheduled Hot Load Framework | Implemented |
+| 015 | Maven Module Split | Implemented |
+| 016 | Admin Config Service And I18n | Implemented |

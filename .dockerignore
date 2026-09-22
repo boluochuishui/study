@@ -2,9 +2,10 @@
 .github
 .idea
 spec
-src
+**/src
 config
 *.iml
 *.log
-target/*
-!target/*.jar
+**/target/*
+!detect-service/target/*.jar
+!admin-service/target/*.jar
