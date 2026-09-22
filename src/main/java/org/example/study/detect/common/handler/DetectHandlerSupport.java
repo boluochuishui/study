@@ -1,4 +1,4 @@
-package org.example.study.handler;
+package org.example.study.detect.common.handler;
 
 import org.example.study.baseSdk.chain.ChainNodeResult;
 
@@ -7,9 +7,9 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Shared helpers for demo moderation handlers.
+ * 检测节点通用结果构造能力。
  */
-abstract class DetectHandlerSupport {
+public abstract class DetectHandlerSupport {
 
     protected long elapsed(Instant startedAt) {
         return Duration.between(startedAt, Instant.now()).toMillis();

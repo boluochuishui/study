@@ -6,21 +6,11 @@ import java.util.Arrays;
  * Supported moderation content categories.
  */
 public enum ContentType {
-    TEXT("text.detect.chain"),
-    IMAGE("image.detect.chain"),
-    AUDIO("audio.detect.chain"),
-    VIDEO("video.detect.chain"),
-    MULTIMODAL("multimodal.detect.chain");
-
-    private final String chainName;
-
-    ContentType(String chainName) {
-        this.chainName = chainName;
-    }
-
-    public String chainName() {
-        return chainName;
-    }
+    TEXT,
+    IMAGE,
+    AUDIO,
+    VIDEO,
+    MULTIMODAL;
 
     public static ContentType from(String value) {
         return Arrays.stream(values())

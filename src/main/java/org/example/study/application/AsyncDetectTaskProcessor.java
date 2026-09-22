@@ -1,10 +1,10 @@
 package org.example.study.application;
 
-import org.example.study.baseSdk.chain.ChainRuntime;
 import org.example.study.baseSdk.log.BaseLogEvent;
 import org.example.study.baseSdk.log.LogLevel;
 import org.example.study.baseSdk.log.LogRecorder;
 import org.example.study.baseSdk.log.LogType;
+import org.example.study.detect.common.ModalityDetectRouter;
 import org.example.study.domain.DetectAction;
 import org.example.study.domain.DetectContext;
 import org.example.study.domain.DetectRequest;
@@ -25,18 +25,18 @@ import java.util.Map;
 @Service
 public class AsyncDetectTaskProcessor {
 
-    private final ChainRuntime chainRuntime;
+    private final ModalityDetectRouter detectRouter;
     private final DetectResultPublisher resultPublisher;
     private final TaskIdGenerator taskIdGenerator;
     private final LogRecorder logRecorder;
 
     public AsyncDetectTaskProcessor(
-            ChainRuntime chainRuntime,
+            ModalityDetectRouter detectRouter,
             DetectResultPublisher resultPublisher,
             TaskIdGenerator taskIdGenerator,
             LogRecorder logRecorder
     ) {
-        this.chainRuntime = chainRuntime;
+        this.detectRouter = detectRouter;
         this.resultPublisher = resultPublisher;
         this.taskIdGenerator = taskIdGenerator;
         this.logRecorder = logRecorder;
@@ -50,7 +50,7 @@ public class AsyncDetectTaskProcessor {
                     taskMessage.traceId(), taskMessage.taskId(), taskMessage.appId(), request
             );
             DetectResult result = DetectResult.success(
-                    chainRuntime.execute(taskMessage.contentType().chainName(), context)
+                    detectRouter.execute(taskMessage.contentType(), context)
             );
             resultMessage = toSuccessMessage(taskMessage, result);
         } catch (RuntimeException exception) {

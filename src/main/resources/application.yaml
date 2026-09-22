@@ -30,6 +30,21 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 
+base-sdk:
+  thread-pool:
+    defaults:
+      core-pool-size: ${THREAD_POOL_CORE_SIZE:4}
+      maximum-pool-size: ${THREAD_POOL_MAX_SIZE:8}
+      queue-capacity: ${THREAD_POOL_QUEUE_CAPACITY:1000}
+      keep-alive-seconds: ${THREAD_POOL_KEEP_ALIVE_SECONDS:60}
+      await-termination-seconds: ${THREAD_POOL_AWAIT_TERMINATION_SECONDS:30}
+      allow-core-thread-timeout: false
+    pools:
+      detect-async:
+        core-pool-size: ${DETECT_ASYNC_CORE_SIZE:8}
+        maximum-pool-size: ${DETECT_ASYNC_MAX_SIZE:32}
+        queue-capacity: ${DETECT_ASYNC_QUEUE_CAPACITY:1000}
+
 study:
   auth:
     # 本地演示凭证通过环境变量覆盖，生产环境应替换为数据库加密凭证源或 STS。

@@ -1,8 +1,9 @@
-package org.example.study.handler;
+package org.example.study.detect.text.handler;
 
 import org.example.study.baseSdk.chain.ChainHandler;
 import org.example.study.baseSdk.chain.ChainHandlerDefinition;
 import org.example.study.baseSdk.chain.ChainNodeResult;
+import org.example.study.detect.common.handler.DetectHandlerSupport;
 import org.example.study.domain.DetectContext;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Flags text containing phone-like contact information for review.
+ * 将包含疑似手机号码的文本标记为人工复审。
  */
 @Component("detect.text.regex.handler")
 public class TextRegexHandler extends DetectHandlerSupport implements ChainHandler<DetectContext> {

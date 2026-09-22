@@ -1,10 +1,10 @@
 package org.example.study.application;
 
-import org.example.study.baseSdk.chain.ChainRuntime;
 import org.example.study.baseSdk.log.BaseLogEvent;
 import org.example.study.baseSdk.log.LogLevel;
 import org.example.study.baseSdk.log.LogRecorder;
 import org.example.study.baseSdk.log.LogType;
+import org.example.study.detect.common.ModalityDetectRouter;
 import org.example.study.domain.AsyncDetectAcceptedResult;
 import org.example.study.domain.ContentType;
 import org.example.study.domain.DetectContext;
@@ -13,7 +13,6 @@ import org.example.study.domain.DetectRequest;
 import org.example.study.domain.DetectResult;
 import org.example.study.domain.DetectStatus;
 import org.example.study.domain.DetectTaskMessage;
-import org.example.study.messaging.DetectTaskPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,23 +25,23 @@ import java.util.Map;
 public class DetectService {
 
     private static final String LOG_SPACE = "content-risk";
-    private final ChainRuntime chainRuntime;
+    private final ModalityDetectRouter detectRouter;
     private final DetectRequestValidator requestValidator;
     private final TaskIdGenerator taskIdGenerator;
-    private final DetectTaskPublisher taskPublisher;
+    private final CompletableFutureDetectTaskDispatcher taskDispatcher;
     private final LogRecorder logRecorder;
 
     public DetectService(
-            ChainRuntime chainRuntime,
+            ModalityDetectRouter detectRouter,
             DetectRequestValidator requestValidator,
             TaskIdGenerator taskIdGenerator,
-            DetectTaskPublisher taskPublisher,
+            CompletableFutureDetectTaskDispatcher taskDispatcher,
             LogRecorder logRecorder
     ) {
-        this.chainRuntime = chainRuntime;
+        this.detectRouter = detectRouter;
         this.requestValidator = requestValidator;
         this.taskIdGenerator = taskIdGenerator;
-        this.taskPublisher = taskPublisher;
+        this.taskDispatcher = taskDispatcher;
         this.logRecorder = logRecorder;
     }
 
@@ -52,7 +51,7 @@ public class DetectService {
         String traceId = taskIdGenerator.nextTraceId();
         DetectContext context = new DetectContext(traceId, taskId, appId, request);
         try {
-            return DetectResult.success(chainRuntime.execute(contentType.chainName(), context));
+            return DetectResult.success(detectRouter.execute(contentType, context));
         } catch (RuntimeException exception) {
             recordFailure(traceId, taskId, appId, request.sceneCode(), "SYNC_DETECT_DEGRADED", exception);
             return DetectResult.degradedPass(taskId, "DETECT_EXECUTION_FAILED", "Detection execution failed");
@@ -69,7 +68,7 @@ public class DetectService {
                 request.sceneCode(), contentType, request.text(), request.imageUrl(),
                 request.audioUrl(), request.videoUrl(), acceptedAt
         );
-        taskPublisher.publish(message);
+        taskDispatcher.submit(message);
         logRecorder.record(new BaseLogEvent(
                 LOG_SPACE, LogType.API, LogLevel.INFO, traceId, taskId, appId, request.sceneCode(),
                 "async-detect-api", "ASYNC_TASK_ACCEPTED", "Async detection task accepted", true, 0,

@@ -4,13 +4,17 @@ import org.example.study.baseSdk.chain.ChainContext;
 import org.example.study.baseSdk.chain.ChainExecuteResult;
 import org.example.study.baseSdk.chain.ChainRuntime;
 import org.example.study.baseSdk.chain.ChainSubmitResult;
+import org.example.study.detect.common.ModalityDetectRouter;
+import org.example.study.detect.text.TextDetectExecutor;
 import org.example.study.domain.DetectAction;
 import org.example.study.domain.DetectRequest;
 import org.example.study.domain.DetectStatus;
-import org.example.study.messaging.DetectTaskPublishReceipt;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * 验证检测执行异常时的故障开放响应。
@@ -30,11 +34,12 @@ class DetectServiceDegradedTests {
                 throw new UnsupportedOperationException("Async submit is not used in this test");
             }
         };
+        ModalityDetectRouter router = new ModalityDetectRouter(List.of(new TextDetectExecutor(failedRuntime)));
         DetectService service = new DetectService(
-                failedRuntime,
+                router,
                 new DetectRequestValidator(),
                 new TaskIdGenerator(),
-                message -> new DetectTaskPublishReceipt("unused"),
+                mock(CompletableFutureDetectTaskDispatcher.class),
                 event -> { }
         );
 

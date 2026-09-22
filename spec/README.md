@@ -12,6 +12,8 @@ Each requirement owns a numbered folder:
 008-sync-async-detect-api
 009-mysql-config-database-sdk
 010-github-actions-pipeline
+011-managed-thread-pool
+012-modality-package-async-execution
 ```
 
 Every folder should contain:
@@ -34,3 +36,5 @@ verification.md  Test cases and validation results
 | 008 | Sync And Async Detect API | Implemented |
 | 009 | MySQL Config Database SDK | Implemented |
 | 010 | GitHub Actions Pipeline | Implemented |
+| 011 | Managed Thread Pool Factory | Implemented |
+| 012 | Modality Package And Async Execution | Implemented |

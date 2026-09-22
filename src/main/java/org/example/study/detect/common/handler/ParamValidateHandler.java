@@ -1,4 +1,4 @@
-package org.example.study.handler;
+package org.example.study.detect.common.handler;
 
 import org.example.study.baseSdk.chain.ChainHandler;
 import org.example.study.baseSdk.chain.ChainHandlerDefinition;
@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Validates that the required payload field exists for the current content type.
+ * 校验当前内容类型对应的请求载荷是否存在。
  */
 @Component("detect.param.validate.handler")
 public class ParamValidateHandler extends DetectHandlerSupport implements ChainHandler<DetectContext> {

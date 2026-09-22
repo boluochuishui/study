@@ -1,8 +1,9 @@
-package org.example.study.handler;
+package org.example.study.detect.text.handler;
 
 import org.example.study.baseSdk.chain.ChainHandler;
 import org.example.study.baseSdk.chain.ChainHandlerDefinition;
 import org.example.study.baseSdk.chain.ChainNodeResult;
+import org.example.study.detect.common.handler.DetectHandlerSupport;
 import org.example.study.domain.DetectContext;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Detects high-risk words in original or derived text.
+ * 检测原始文本或派生文本中的高风险关键词。
  */
 @Component("detect.text.keyword.handler")
 public class TextKeywordHandler extends DetectHandlerSupport implements ChainHandler<DetectContext> {
