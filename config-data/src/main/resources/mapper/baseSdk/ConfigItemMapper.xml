@@ -7,6 +7,7 @@
     <resultMap id="configItemResultMap"
                type="org.example.study.baseSdk.database.mybatis.entity.ConfigItemEntity">
         <id property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
         <result property="namespace" column="namespace"/>
         <result property="configKey" column="config_key"/>
         <result property="configValue" column="config_value"/>
@@ -19,7 +20,7 @@
     </resultMap>
 
     <sql id="configItemColumns">
-        id, namespace, config_key, config_value, version, enabled,
+        id, tenant_id, namespace, config_key, config_value, version, enabled,
         description, deleted, created_at, updated_at
     </sql>
 
@@ -27,7 +28,8 @@
         SELECT
         <include refid="configItemColumns"/>
         FROM sdk_config_item
-        WHERE namespace = #{namespace}
+        WHERE tenant_id = #{tenantId}
+          AND namespace = #{namespace}
           AND config_key = #{configKey}
           AND enabled = 1
           AND deleted = 0
@@ -38,7 +40,8 @@
         SELECT
         <include refid="configItemColumns"/>
         FROM sdk_config_item
-        WHERE namespace = #{namespace}
+        WHERE tenant_id = #{tenantId}
+          AND namespace = #{namespace}
           AND config_key = #{configKey}
           AND deleted = 0
         LIMIT 1
@@ -48,7 +51,8 @@
         SELECT
         <include refid="configItemColumns"/>
         FROM sdk_config_item
-        WHERE namespace = #{namespace}
+        WHERE tenant_id = #{tenantId}
+          AND namespace = #{namespace}
           AND enabled = 1
           AND deleted = 0
         ORDER BY config_key ASC
@@ -59,7 +63,8 @@
         SELECT
         <include refid="configItemColumns"/>
         FROM sdk_config_item
-        WHERE namespace = #{namespace}
+        WHERE tenant_id = #{tenantId}
+          AND namespace = #{namespace}
           AND deleted = 0
         ORDER BY config_key ASC
         LIMIT 500

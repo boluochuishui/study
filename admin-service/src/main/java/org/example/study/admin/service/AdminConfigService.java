@@ -2,6 +2,7 @@ package org.example.study.admin.service;
 
 import org.example.study.admin.api.AdminApiException;
 import org.example.study.admin.api.SaveConfigRequest;
+import org.example.study.admin.security.AdminSecurityContext;
 import org.example.study.baseSdk.database.api.exception.ConfigConflictException;
 import org.example.study.baseSdk.database.api.model.ConfigItemData;
 import org.example.study.baseSdk.database.api.model.SaveConfigItemCommand;
@@ -29,12 +30,12 @@ public class AdminConfigService {
 
     public List<ConfigItemData> list(String namespace) {
         validateName(namespace);
-        return configDataService.list(namespace);
+        return configDataService.list(tenantId(), namespace);
     }
 
     public ConfigItemData get(String namespace, String key) {
         validateNames(namespace, key);
-        return configDataService.find(namespace, key)
+        return configDataService.find(tenantId(), namespace, key)
                 .orElseThrow(() -> new AdminApiException("CONFIG_NOT_FOUND", "Config item not found", HttpStatus.NOT_FOUND));
     }
 
@@ -48,7 +49,8 @@ public class AdminConfigService {
         }
         try {
             ConfigItemData saved = configDataService.saveIfVersion(new SaveConfigItemCommand(
-                    namespace, key, request.value(), request.enabled(), request.description()), request.version());
+                    tenantId(), namespace, key, request.value(), request.enabled(), request.description()),
+                    request.version());
             LOGGER.info("Admin config saved, namespace={}, key={}, version={}, enabled={}",
                     namespace, key, saved.version(), saved.enabled());
             return saved;
@@ -70,6 +72,10 @@ public class AdminConfigService {
     private void validateNames(String namespace, String key) {
         validateName(namespace);
         validateName(key);
+    }
+
+    private long tenantId() {
+        return AdminSecurityContext.requirePrincipal().tenantId();
     }
 
     private void validateName(String value) {

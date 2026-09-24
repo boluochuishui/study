@@ -5,7 +5,7 @@ WORKDIR /application
 RUN addgroup -S application \
     && adduser -S application -G application
 
-COPY --chown=application:application detect-service/target/study-detect-service-*.jar application.jar
+COPY --chown=application:application access-service/target/study-access-service-*.jar application.jar
 
 USER application
 

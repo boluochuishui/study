@@ -53,7 +53,11 @@ jobs:
           if-no-files-found: error
           retention-days: 30
           path: |
-            detect-service/target/study-detect-service-${{ inputs.version }}.jar
+            access-service/target/study-access-service-${{ inputs.version }}.jar
+            text-detect-service/target/text-detect-service-${{ inputs.version }}.jar
+            image-detect-service/target/image-detect-service-${{ inputs.version }}.jar
+            audio-detect-service/target/audio-detect-service-${{ inputs.version }}.jar
+            video-detect-service/target/video-detect-service-${{ inputs.version }}.jar
             admin-service/target/study-admin-service-${{ inputs.version }}.jar
             **/target/surefire-reports/
             **/target/checkstyle-*.xml
@@ -68,7 +72,7 @@ jobs:
         with:
           context: .
           push: false
-          tags: study:${{ inputs.version }}
+          tags: study-access:${{ inputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -81,3 +85,35 @@ jobs:
           tags: study-admin:${{ inputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Build text detection Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: text-detect-service/Dockerfile
+          push: false
+          tags: study-text-detect:${{ inputs.version }}
+
+      - name: Build image detection Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: image-detect-service/Dockerfile
+          push: false
+          tags: study-image-detect:${{ inputs.version }}
+
+      - name: Build audio detection Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: audio-detect-service/Dockerfile
+          push: false
+          tags: study-audio-detect:${{ inputs.version }}
+
+      - name: Build video detection Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: video-detect-service/Dockerfile
+          push: false
+          tags: study-video-detect:${{ inputs.version }}

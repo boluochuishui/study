@@ -6,13 +6,36 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="study" />
+        <module name="video-detect-service" />
+        <module name="image-detect-service" />
+        <module name="config-data" />
+        <module name="text-detect-service" />
+        <module name="study-access-service" />
+        <module name="detect-worker-core" />
+        <module name="audio-detect-service" />
+        <module name="base-sdk" />
+        <module name="detect-contract" />
+        <module name="study-admin-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="study-detect-service" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="study" options="-parameters" />
+      <module name="audio-detect-service" options="-parameters" />
+      <module name="base-sdk" options="-parameters" />
+      <module name="config-data" options="-parameters" />
+      <module name="detect-contract" options="-parameters" />
+      <module name="detect-worker-core" options="-parameters" />
+      <module name="image-detect-service" options="-parameters" />
+      <module name="study" options="" />
+      <module name="study-access-service" options="-parameters" />
+      <module name="study-admin-service" options="-parameters" />
+      <module name="study-detect-service" options="-parameters" />
+      <module name="text-detect-service" options="-parameters" />
+      <module name="video-detect-service" options="-parameters" />
     </option>
   </component>
 </project>

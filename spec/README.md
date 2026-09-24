@@ -18,6 +18,9 @@ Each requirement owns a numbered folder:
 014-scheduled-hotload-framework
 015-maven-module-split
 016-admin-config-service
+017-distributed-modality-services
+018-spel-rule-engine
+019-spel-rule-management-hotload
 ```
 
 Every folder should contain:
@@ -46,3 +49,7 @@ verification.md  Test cases and validation results
 | 014 | Scheduled Hot Load Framework | Implemented |
 | 015 | Maven Module Split | Implemented |
 | 016 | Admin Config Service And I18n | Implemented |
+| 017 | Distributed Access And Modality Services | Implemented |
+| 018 | Common SpEL Rule Engine | Implemented |
+| 019 | SpEL Rule Management And Hot Load | Implemented |
+| 020 | Admin Multi-tenant RBAC | In Progress |

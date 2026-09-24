@@ -11,6 +11,7 @@ target/
 application-local.yaml
 src/main/resources/application-local.yaml
 detect-service/src/main/resources/application-local.yaml
+access-service/src/main/resources/application-local.yaml
 
 .DS_Store
 Thumbs.db

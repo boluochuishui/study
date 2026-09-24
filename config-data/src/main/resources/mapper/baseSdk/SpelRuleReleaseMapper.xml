@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.study.baseSdk.database.mybatis.mapper.SpelRuleReleaseMapper">
+    <resultMap id="releaseResult" type="org.example.study.baseSdk.database.mybatis.entity.SpelRuleReleaseEntity">
+        <id property="releaseId" column="release_id"/><result property="tenantId" column="tenant_id"/>
+        <result property="ruleSetCode" column="rule_set_code"/>
+        <result property="releaseVersion" column="release_version"/><result property="scene" column="scene"/>
+        <result property="snapshotJson" column="snapshot_json"/><result property="checksum" column="checksum"/>
+        <result property="deleted" column="deleted"/><result property="publishedBy" column="published_by"/>
+        <result property="publishedAt" column="published_at"/>
+    </resultMap>
+    <sql id="columns">release_id, tenant_id, rule_set_code, release_version, scene, snapshot_json,
+        checksum, deleted, published_by, published_at</sql>
+    <select id="selectByRuleSetCode" resultMap="releaseResult">
+        SELECT <include refid="columns"/> FROM sdk_spel_rule_release
+        WHERE tenant_id = #{tenantId} AND rule_set_code = #{ruleSetCode}
+        ORDER BY release_version DESC LIMIT 100
+    </select>
+    <select id="selectByVersion" resultMap="releaseResult">
+        SELECT <include refid="columns"/> FROM sdk_spel_rule_release
+        WHERE tenant_id = #{tenantId} AND rule_set_code = #{ruleSetCode}
+          AND release_version = #{releaseVersion} LIMIT 1
+    </select>
+    <select id="selectLatestByScene" resultMap="releaseResult">
+        SELECT r.release_id, r.tenant_id, r.rule_set_code, r.release_version, r.scene, r.snapshot_json,
+               r.checksum, r.deleted, r.published_by, r.published_at
+        FROM sdk_spel_rule_release r
+        INNER JOIN (SELECT rule_set_code, MAX(release_id) AS release_id FROM sdk_spel_rule_release
+                    WHERE tenant_id = #{tenantId} AND scene = #{scene}
+                    GROUP BY rule_set_code) latest ON latest.release_id = r.release_id
+        WHERE r.tenant_id = #{tenantId}
+        ORDER BY r.rule_set_code
+    </select>
+    <select id="selectChanges" resultMap="releaseResult">
+        SELECT <include refid="columns"/> FROM sdk_spel_rule_release
+        WHERE tenant_id = #{tenantId} AND scene = #{scene}
+          AND release_id &gt; #{afterCursor} ORDER BY release_id LIMIT #{limit}
+    </select>
+    <select id="selectMaxCursor" resultType="java.lang.Long">
+        SELECT COALESCE(MAX(release_id), 0) FROM sdk_spel_rule_release
+        WHERE tenant_id = #{tenantId} AND scene = #{scene}
+    </select>
+</mapper>

@@ -22,7 +22,7 @@ class ConfigDataServiceVersionTests {
 
     private final ConfigItemMapper mapper = mock(ConfigItemMapper.class);
     private final ConfigDataServiceImpl service = new ConfigDataServiceImpl(mapper);
-    private final SaveConfigItemCommand command = new SaveConfigItemCommand("demo", "key", "value", true, null);
+    private final SaveConfigItemCommand command = new SaveConfigItemCommand(1, "demo", "key", "value", true, null);
 
     @Test
     void createsOnlyWithZeroExpectedVersion() {
@@ -43,7 +43,7 @@ class ConfigDataServiceVersionTests {
         ConfigItemEntity entity = new ConfigItemEntity();
         entity.setId(1L);
         entity.setVersion(4L);
-        when(mapper.selectAny("demo", "key")).thenReturn(entity);
+        when(mapper.selectAny(1, "demo", "key")).thenReturn(entity);
 
         assertThatThrownBy(() -> service.saveIfVersion(command, 3))
                 .isInstanceOf(ConfigConflictException.class);

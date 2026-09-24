@@ -7,5 +7,9 @@ config
 *.iml
 *.log
 **/target/*
-!detect-service/target/*.jar
+!access-service/target/*.jar
+!text-detect-service/target/*.jar
+!image-detect-service/target/*.jar
+!audio-detect-service/target/*.jar
+!video-detect-service/target/*.jar
 !admin-service/target/*.jar

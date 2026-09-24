@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
  */
 public record ConfigItemData(
         Long id,
+        Long tenantId,
         String namespace,
         String configKey,
         String configValue,

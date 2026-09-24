@@ -12,6 +12,7 @@ import lombok.Setter;
 @TableName("sdk_config_item")
 public class ConfigItemEntity extends BaseEntity {
 
+    private Long tenantId;
     private String namespace;
     private String configKey;
     private String configValue;

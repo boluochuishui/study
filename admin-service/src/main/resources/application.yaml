@@ -26,4 +26,9 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 admin:
-  token: ${ADMIN_TOKEN:}
+  security:
+    token-ttl-hours: ${ADMIN_TOKEN_TTL_HOURS:8}
+  bootstrap:
+    tenant-code: ${ADMIN_BOOTSTRAP_TENANT:default}
+    username: ${ADMIN_BOOTSTRAP_USERNAME:admin}
+    password: ${ADMIN_BOOTSTRAP_PASSWORD:}

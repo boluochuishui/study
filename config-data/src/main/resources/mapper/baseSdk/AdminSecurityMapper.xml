@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.study.baseSdk.database.mybatis.mapper.AdminSecurityMapper">
+    <resultMap id="userResult" type="org.example.study.baseSdk.database.mybatis.entity.AdminUserEntity">
+        <id property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="tenantCode" column="tenant_code"/>
+        <result property="username" column="username"/>
+        <result property="displayName" column="display_name"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="enabled" column="enabled"/>
+    </resultMap>
+    <resultMap id="roleResult" type="org.example.study.baseSdk.database.mybatis.entity.AdminRoleEntity">
+        <id property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="roleCode" column="role_code"/>
+        <result property="roleName" column="role_name"/>
+        <result property="enabled" column="enabled"/>
+    </resultMap>
+    <resultMap id="permissionResult" type="org.example.study.baseSdk.database.mybatis.entity.AdminPermissionEntity">
+        <result property="permissionCode" column="permission_code"/>
+        <result property="permissionName" column="permission_name"/>
+    </resultMap>
+    <select id="selectUserForLogin" resultMap="userResult">
+        SELECT u.id, u.tenant_id, t.tenant_code, u.username, u.display_name, u.password_hash, u.enabled
+        FROM admin_user u
+        JOIN admin_tenant t ON t.id = u.tenant_id
+        WHERE t.tenant_code = #{tenantCode} AND t.enabled = 1
+          AND u.username = #{username} AND u.enabled = 1
+        LIMIT 1
+    </select>
+    <select id="selectIdentityByToken" resultMap="userResult">
+        SELECT u.id, u.tenant_id, t.tenant_code, u.username, u.display_name, u.password_hash, u.enabled
+        FROM admin_access_token token
+        JOIN admin_user u ON u.id = token.user_id AND u.tenant_id = token.tenant_id
+        JOIN admin_tenant t ON t.id = token.tenant_id
+        WHERE token.token_hash = #{tokenHash} AND token.revoked = 0
+          AND token.expires_at &gt; #{now} AND u.enabled = 1 AND t.enabled = 1
+        LIMIT 1
+    </select>
+    <select id="selectUserPermissions" resultType="java.lang.String">
+        SELECT DISTINCT p.permission_code
+        FROM admin_user_role ur
+        JOIN admin_role r ON r.id = ur.role_id AND r.tenant_id = ur.tenant_id
+        JOIN admin_role_permission rp ON rp.role_id = r.id
+        JOIN admin_permission p ON p.id = rp.permission_id
+        WHERE ur.tenant_id = #{tenantId} AND ur.user_id = #{userId} AND r.enabled = 1
+        ORDER BY p.permission_code
+    </select>
+    <insert id="insertAccessToken">
+        INSERT INTO admin_access_token (tenant_id, user_id, token_hash, expires_at, revoked)
+        VALUES (#{tenantId}, #{userId}, #{tokenHash}, #{expiresAt}, 0)
+    </insert>
+    <update id="revokeAccessToken">
+        UPDATE admin_access_token SET revoked = 1 WHERE token_hash = #{tokenHash} AND revoked = 0
+    </update>
+    <select id="countUsers" resultType="long">
+        SELECT COUNT(*) FROM admin_user u JOIN admin_tenant t ON t.id = u.tenant_id
+        WHERE t.tenant_code = #{tenantCode}
+    </select>
+    <insert id="insertUser" parameterType="org.example.study.baseSdk.database.mybatis.entity.AdminUserEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admin_user (tenant_id, username, display_name, password_hash, enabled)
+        VALUES (#{tenantId}, #{username}, #{displayName}, #{passwordHash}, 1)
+    </insert>
+    <select id="selectUsers" resultMap="userResult">
+        SELECT u.id, u.tenant_id, t.tenant_code, u.username, u.display_name, u.password_hash, u.enabled
+        FROM admin_user u JOIN admin_tenant t ON t.id = u.tenant_id
+        WHERE u.tenant_id = #{tenantId} ORDER BY u.username LIMIT 500
+    </select>
+    <select id="selectRoles" resultMap="roleResult">
+        SELECT id, tenant_id, role_code, role_name, enabled FROM admin_role
+        WHERE tenant_id = #{tenantId} ORDER BY role_code LIMIT 500
+    </select>
+    <select id="selectRoleByCode" resultMap="roleResult">
+        SELECT id, tenant_id, role_code, role_name, enabled FROM admin_role
+        WHERE tenant_id = #{tenantId} AND role_code = #{roleCode} LIMIT 1
+    </select>
+    <select id="selectPermissions" resultMap="permissionResult">
+        SELECT permission_code, permission_name FROM admin_permission ORDER BY permission_code
+    </select>
+    <insert id="upsertRole">
+        INSERT INTO admin_role (tenant_id, role_code, role_name, enabled)
+        VALUES (#{tenantId}, #{roleCode}, #{roleName}, #{enabled})
+        ON DUPLICATE KEY UPDATE role_name = #{roleName}, enabled = #{enabled}
+    </insert>
+    <delete id="deleteRolePermissions">
+        DELETE rp FROM admin_role_permission rp
+        JOIN admin_role r ON r.id = rp.role_id
+        WHERE r.tenant_id = #{tenantId} AND r.role_code = #{roleCode}
+    </delete>
+    <insert id="insertRolePermissionByCode">
+        INSERT INTO admin_role_permission (role_id, permission_id)
+        SELECT r.id, p.id FROM admin_role r JOIN admin_permission p
+        WHERE r.tenant_id = #{tenantId} AND r.role_code = #{roleCode}
+          AND p.permission_code = #{permissionCode}
+    </insert>
+    <select id="selectRolePermissions" resultType="java.lang.String">
+        SELECT p.permission_code
+        FROM admin_role_permission rp
+        JOIN admin_permission p ON p.id = rp.permission_id
+        WHERE rp.role_id = #{roleId} ORDER BY p.permission_code
+    </select>
+    <delete id="deleteUserRoles">
+        DELETE FROM admin_user_role WHERE tenant_id = #{tenantId} AND user_id = #{userId}
+    </delete>
+    <insert id="insertUserRoleByCode">
+        INSERT INTO admin_user_role (tenant_id, user_id, role_id)
+        SELECT #{tenantId}, #{userId}, r.id FROM admin_role r
+        WHERE r.tenant_id = #{tenantId} AND r.role_code = #{roleCode} AND r.enabled = 1
+    </insert>
+    <select id="selectTenantId" resultType="java.lang.Long">
+        SELECT id FROM admin_tenant WHERE tenant_code = #{tenantCode} AND enabled = 1 LIMIT 1
+    </select>
+    <select id="countUserInTenant" resultType="long">
+        SELECT COUNT(*) FROM admin_user WHERE tenant_id = #{tenantId} AND id = #{userId}
+    </select>
+</mapper>

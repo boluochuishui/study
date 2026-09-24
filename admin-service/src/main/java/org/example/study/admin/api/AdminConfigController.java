@@ -2,6 +2,8 @@ package org.example.study.admin.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.study.admin.service.AdminConfigService;
+import org.example.study.admin.security.AdminPermissions;
+import org.example.study.admin.security.RequireAdminPermission;
 import org.example.study.baseSdk.database.api.model.ConfigItemData;
 import org.springframework.context.MessageSource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,23 +34,27 @@ public class AdminConfigController {
     }
 
     @GetMapping
+    @RequireAdminPermission(AdminPermissions.CONFIG_READ)
     public AdminResponse<List<ConfigItemData>> list(@RequestParam String namespace, HttpServletRequest request) {
         return success(service.list(namespace), request);
     }
 
     @GetMapping("/{namespace}/{key}")
+    @RequireAdminPermission(AdminPermissions.CONFIG_READ)
     public AdminResponse<ConfigItemData> get(@PathVariable String namespace, @PathVariable String key,
                                              HttpServletRequest request) {
         return success(service.get(namespace, key), request);
     }
 
     @PutMapping("/{namespace}/{key}")
+    @RequireAdminPermission(AdminPermissions.CONFIG_WRITE)
     public AdminResponse<ConfigItemData> save(@PathVariable String namespace, @PathVariable String key,
                                               @RequestBody SaveConfigRequest body, HttpServletRequest request) {
         return success(service.save(namespace, key, body), request);
     }
 
     @PostMapping("/{namespace}/{key}/disable")
+    @RequireAdminPermission(AdminPermissions.CONFIG_WRITE)
     public AdminResponse<ConfigItemData> disable(@PathVariable String namespace, @PathVariable String key,
                                                  @RequestBody VersionRequest body, HttpServletRequest request) {
         return success(service.disable(namespace, key, body == null ? null : body.version()), request);

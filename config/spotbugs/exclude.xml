@@ -5,6 +5,22 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
         <Field name="objectMapper"/>
     </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Field name="kafkaTemplate"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Field name="mapper"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Field name="service"/>
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Field name="dataService"/>
+    </Match>
 
     <!-- 构造失败由 Spring 启动过程处理，相关 Bean 不定义 finalizer。 -->
     <Match>

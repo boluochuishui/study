@@ -17,12 +17,18 @@
 	<modules>
 		<module>base-sdk</module>
 		<module>config-data</module>
-		<module>detect-service</module>
+		<module>detect-contract</module>
+		<module>detect-worker-core</module>
+		<module>access-service</module>
+		<module>text-detect-service</module>
+		<module>image-detect-service</module>
+		<module>audio-detect-service</module>
+		<module>video-detect-service</module>
 		<module>admin-service</module>
 	</modules>
 	<properties>
 		<java.version>21</java.version>
-		<rocketmq-client.version>5.0.8</rocketmq-client.version>
+		<dubbo.version>3.3.6</dubbo.version>
 		<mybatis-plus.version>3.5.17</mybatis-plus.version>
 		<maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
 		<spotbugs-maven-plugin.version>4.9.8.2</spotbugs-maven-plugin.version>
@@ -44,9 +50,24 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.rocketmq</groupId>
-				<artifactId>rocketmq-client-java</artifactId>
-				<version>${rocketmq-client.version}</version>
+				<groupId>org.example</groupId>
+				<artifactId>detect-contract</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.example</groupId>
+				<artifactId>detect-worker-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.dubbo</groupId>
+				<artifactId>dubbo-spring-boot-starter</artifactId>
+				<version>${dubbo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.dubbo</groupId>
+				<artifactId>dubbo-registry-nacos</artifactId>
+				<version>${dubbo.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.baomidou</groupId>

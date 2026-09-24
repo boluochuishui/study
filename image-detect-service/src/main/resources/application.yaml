@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: image-detect-service
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:content_risk}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+
+dubbo:
+  application:
+    name: image-detect-service
+    qos-enable: false
+  protocol:
+    name: tri
+    port: ${DUBBO_PORT:50052}
+  registry:
+    address: ${NACOS_ADDRESS:N/A}
+  provider:
+    timeout: ${DUBBO_PROVIDER_TIMEOUT_MS:5000}
+
+study:
+  worker:
+    messaging:
+      mode: ${DETECT_MESSAGING_MODE:logging}
+    kafka:
+      task-topic: ${DETECT_TASK_TOPIC:detect-task-image}
+      consumer-group: ${DETECT_CONSUMER_GROUP:image-detect-consumer}
+      result-topic: ${DETECT_RESULT_TOPIC:detect-result}
+      publish-timeout: ${KAFKA_PUBLISH_TIMEOUT:3s}
+
+detect:
+  rules:
+    spel:
+      enabled: ${SPEL_RULE_HOTLOAD_ENABLED:false}
+      tenant-id: ${DETECT_TENANT_ID:1}
+      scene: IMAGE
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    banner: false

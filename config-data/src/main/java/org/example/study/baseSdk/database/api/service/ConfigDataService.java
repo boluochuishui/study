@@ -11,17 +11,17 @@ import java.util.Optional;
  */
 public interface ConfigDataService {
 
-    Optional<ConfigItemData> findEnabled(String namespace, String configKey);
+    Optional<ConfigItemData> findEnabled(long tenantId, String namespace, String configKey);
 
-    List<ConfigItemData> listEnabled(String namespace);
+    List<ConfigItemData> listEnabled(long tenantId, String namespace);
 
-    Optional<ConfigItemData> find(String namespace, String configKey);
+    Optional<ConfigItemData> find(long tenantId, String namespace, String configKey);
 
-    List<ConfigItemData> list(String namespace);
+    List<ConfigItemData> list(long tenantId, String namespace);
 
     ConfigItemData save(SaveConfigItemCommand command);
 
     ConfigItemData saveIfVersion(SaveConfigItemCommand command, long expectedVersion);
 
-    boolean disable(String namespace, String configKey);
+    boolean disable(long tenantId, String namespace, String configKey);
 }

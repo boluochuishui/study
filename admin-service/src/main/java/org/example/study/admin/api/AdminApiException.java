@@ -16,6 +16,12 @@ public class AdminApiException extends RuntimeException {
         this.status = status;
     }
 
+    public AdminApiException(String code, String message, HttpStatus status, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+        this.status = status;
+    }
+
     public String code() {
         return code;
     }

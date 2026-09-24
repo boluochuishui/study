@@ -12,16 +12,20 @@ import java.util.List;
 public interface ConfigItemMapper extends BaseMapper<ConfigItemEntity> {
 
     ConfigItemEntity selectEnabled(
+            @Param("tenantId") long tenantId,
             @Param("namespace") String namespace,
             @Param("configKey") String configKey
     );
 
     ConfigItemEntity selectAny(
+            @Param("tenantId") long tenantId,
             @Param("namespace") String namespace,
             @Param("configKey") String configKey
     );
 
-    List<ConfigItemEntity> selectEnabledList(@Param("namespace") String namespace);
+    List<ConfigItemEntity> selectEnabledList(@Param("tenantId") long tenantId,
+                                             @Param("namespace") String namespace);
 
-    List<ConfigItemEntity> selectListByNamespace(@Param("namespace") String namespace);
+    List<ConfigItemEntity> selectListByNamespace(@Param("tenantId") long tenantId,
+                                                 @Param("namespace") String namespace);
 }

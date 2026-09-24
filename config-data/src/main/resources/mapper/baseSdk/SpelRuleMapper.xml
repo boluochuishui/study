@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.study.baseSdk.database.mybatis.mapper.SpelRuleSetMapper">
+    <resultMap id="ruleSetResult" type="org.example.study.baseSdk.database.mybatis.entity.SpelRuleSetEntity">
+        <id property="id" column="id"/><result property="tenantId" column="tenant_id"/>
+        <result property="ruleSetCode" column="rule_set_code"/>
+        <result property="ruleSetName" column="rule_set_name"/><result property="scene" column="scene"/>
+        <result property="evaluationMode" column="evaluation_mode"/><result property="errorPolicy" column="error_policy"/>
+        <result property="publishedVersion" column="published_version"/><result property="version" column="version"/>
+        <result property="enabled" column="enabled"/><result property="deleted" column="deleted"/>
+        <result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    <sql id="columns">id, tenant_id, rule_set_code, rule_set_name, scene, evaluation_mode, error_policy,
+        published_version, version, enabled, deleted, created_at, updated_at</sql>
+    <select id="selectByCode" resultMap="ruleSetResult">
+        SELECT <include refid="columns"/> FROM sdk_spel_rule_set
+        WHERE tenant_id = #{tenantId} AND rule_set_code = #{ruleSetCode} AND deleted = 0 LIMIT 1
+    </select>
+    <select id="selectByCodeForUpdate" resultMap="ruleSetResult">
+        SELECT <include refid="columns"/> FROM sdk_spel_rule_set
+        WHERE tenant_id = #{tenantId} AND rule_set_code = #{ruleSetCode} AND deleted = 0 LIMIT 1 FOR UPDATE
+    </select>
+    <select id="selectAllRuleSets" resultMap="ruleSetResult">
+        SELECT <include refid="columns"/> FROM sdk_spel_rule_set
+        WHERE tenant_id = #{tenantId} AND deleted = 0 ORDER BY rule_set_code LIMIT 500
+    </select>
+</mapper>

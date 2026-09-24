@@ -29,10 +29,11 @@ public class ConfigDataServiceImpl implements ConfigDataService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ConfigItemData> findEnabled(String namespace, String configKey) {
+    public Optional<ConfigItemData> findEnabled(long tenantId, String namespace, String configKey) {
+        validateTenantId(tenantId);
         validateKey(namespace, configKey);
         try {
-            return Optional.ofNullable(configItemMapper.selectEnabled(namespace, configKey))
+            return Optional.ofNullable(configItemMapper.selectEnabled(tenantId, namespace, configKey))
                     .map(this::toData);
         } catch (DataAccessException exception) {
             throw new DatabaseSdkException("Failed to query config item", exception);
@@ -41,10 +42,11 @@ public class ConfigDataServiceImpl implements ConfigDataService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ConfigItemData> listEnabled(String namespace) {
+    public List<ConfigItemData> listEnabled(long tenantId, String namespace) {
+        validateTenantId(tenantId);
         requireText(namespace, "Config namespace must not be blank");
         try {
-            return configItemMapper.selectEnabledList(namespace).stream()
+            return configItemMapper.selectEnabledList(tenantId, namespace).stream()
                     .map(this::toData)
                     .toList();
         } catch (DataAccessException exception) {
@@ -54,10 +56,11 @@ public class ConfigDataServiceImpl implements ConfigDataService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ConfigItemData> find(String namespace, String configKey) {
+    public Optional<ConfigItemData> find(long tenantId, String namespace, String configKey) {
+        validateTenantId(tenantId);
         validateKey(namespace, configKey);
         try {
-            return Optional.ofNullable(configItemMapper.selectAny(namespace, configKey)).map(this::toData);
+            return Optional.ofNullable(configItemMapper.selectAny(tenantId, namespace, configKey)).map(this::toData);
         } catch (DataAccessException exception) {
             throw new DatabaseSdkException("Failed to query config item", exception);
         }
@@ -65,10 +68,11 @@ public class ConfigDataServiceImpl implements ConfigDataService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ConfigItemData> list(String namespace) {
+    public List<ConfigItemData> list(long tenantId, String namespace) {
+        validateTenantId(tenantId);
         requireText(namespace, "Config namespace must not be blank");
         try {
-            return configItemMapper.selectListByNamespace(namespace).stream().map(this::toData).toList();
+            return configItemMapper.selectListByNamespace(tenantId, namespace).stream().map(this::toData).toList();
         } catch (DataAccessException exception) {
             throw new DatabaseSdkException("Failed to query config items", exception);
         }
@@ -79,9 +83,11 @@ public class ConfigDataServiceImpl implements ConfigDataService {
     public ConfigItemData save(SaveConfigItemCommand command) {
         validateCommand(command);
         try {
-            ConfigItemEntity entity = configItemMapper.selectAny(command.namespace(), command.configKey());
+            ConfigItemEntity entity = configItemMapper.selectAny(
+                    command.tenantId(), command.namespace(), command.configKey());
             if (entity == null) {
                 entity = new ConfigItemEntity();
+                entity.setTenantId(command.tenantId());
                 entity.setNamespace(command.namespace());
                 entity.setConfigKey(command.configKey());
                 entity.setVersion(1L);
@@ -112,12 +118,14 @@ public class ConfigDataServiceImpl implements ConfigDataService {
             throw new IllegalArgumentException("Expected version must not be negative");
         }
         try {
-            ConfigItemEntity entity = configItemMapper.selectAny(command.namespace(), command.configKey());
+            ConfigItemEntity entity = configItemMapper.selectAny(
+                    command.tenantId(), command.namespace(), command.configKey());
             if (entity == null) {
                 if (expectedVersion != 0) {
                     throw new ConfigConflictException();
                 }
                 entity = new ConfigItemEntity();
+                entity.setTenantId(command.tenantId());
                 entity.setNamespace(command.namespace());
                 entity.setConfigKey(command.configKey());
                 entity.setVersion(1L);
@@ -145,10 +153,11 @@ public class ConfigDataServiceImpl implements ConfigDataService {
 
     @Override
     @Transactional
-    public boolean disable(String namespace, String configKey) {
+    public boolean disable(long tenantId, String namespace, String configKey) {
+        validateTenantId(tenantId);
         validateKey(namespace, configKey);
         try {
-            ConfigItemEntity entity = configItemMapper.selectAny(namespace, configKey);
+            ConfigItemEntity entity = configItemMapper.selectAny(tenantId, namespace, configKey);
             if (entity == null || Boolean.FALSE.equals(entity.getEnabled())) {
                 return false;
             }
@@ -166,7 +175,8 @@ public class ConfigDataServiceImpl implements ConfigDataService {
 
     private ConfigItemData toData(ConfigItemEntity entity) {
         return new ConfigItemData(
-                entity.getId(), entity.getNamespace(), entity.getConfigKey(), entity.getConfigValue(),
+                entity.getId(), entity.getTenantId(), entity.getNamespace(), entity.getConfigKey(),
+                entity.getConfigValue(),
                 entity.getVersion(), Boolean.TRUE.equals(entity.getEnabled()), entity.getDescription(),
                 entity.getCreatedAt(), entity.getUpdatedAt()
         );
@@ -176,6 +186,7 @@ public class ConfigDataServiceImpl implements ConfigDataService {
         if (command == null) {
             throw new IllegalArgumentException("Save config command must not be null");
         }
+        validateTenantId(command.tenantId());
         validateKey(command.namespace(), command.configKey());
         requireText(command.configValue(), "Config value must not be blank");
     }
@@ -188,6 +199,12 @@ public class ConfigDataServiceImpl implements ConfigDataService {
     private void requireText(String value, String message) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(message);
+        }
+    }
+
+    private void validateTenantId(long tenantId) {
+        if (tenantId <= 0) {
+            throw new IllegalArgumentException("Tenant id must be positive");
         }
     }
 }

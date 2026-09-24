@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: access-service
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:content_risk}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: content-risk-database-pool
+      minimum-idle: 1
+      maximum-pool-size: 10
+      connection-timeout: 3000
+  flyway:
+    enabled: ${MYSQL_MIGRATION_ENABLED:false}
+    locations: classpath:db/migration
+    validate-migration-naming: true
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: org.example.study.baseSdk.database.mybatis.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+base-sdk:
+  hotload:
+    poll-interval-ms: ${HOTLOAD_POLL_INTERVAL_MS:30000}
+    full-refresh-interval-millis: ${HOTLOAD_FULL_REFRESH_INTERVAL_MS:3600000}
+    batch-size: ${HOTLOAD_BATCH_SIZE:500}
+
+dubbo:
+  application:
+    name: access-service
+    qos-enable: false
+  registry:
+    address: ${NACOS_ADDRESS:N/A}
+  consumer:
+    check: false
+    retries: 0
+
+study:
+  auth:
+    # 本地演示凭证通过环境变量覆盖，生产环境应替换为数据库加密凭证源或 STS。
+    app-id: ${AUTH_APP_ID:demo-app}
+    app-secret: ${AUTH_APP_SECRET:demo-secret}
+    clock-skew-seconds: ${AUTH_CLOCK_SKEW_SECONDS:300}
+    nonce-ttl-seconds: ${AUTH_NONCE_TTL_SECONDS:600}
+    max-body-bytes: ${AUTH_MAX_BODY_BYTES:5242880}
+    refresh-delay-millis: ${AUTH_REFRESH_DELAY_MILLIS:30000}
