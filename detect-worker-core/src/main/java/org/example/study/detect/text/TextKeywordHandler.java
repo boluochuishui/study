@@ -5,6 +5,7 @@ import org.example.study.baseSdk.chain.ChainHandlerDefinition;
 import org.example.study.baseSdk.chain.ChainNodeResult;
 import org.example.study.detect.common.handler.DetectHandlerSupport;
 import org.example.study.domain.DetectContext;
+import org.example.study.domain.DetectAction;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -20,11 +21,13 @@ public class TextKeywordHandler extends DetectHandlerSupport implements ChainHan
     @Override
     public ChainNodeResult handle(DetectContext context, ChainHandlerDefinition handlerDefinition) {
         Instant startedAt = Instant.now();
-        String text = context.allText();
+        String text = context.detectionText();
         List<String> keywords = Arrays.stream("赌博,诈骗,涉黄,暴恐".split(",")).toList();
         List<String> hits = keywords.stream().filter(text::contains).toList();
         if (!hits.isEmpty()) {
-            return reject(handlerDefinition.handlerName(), "hit keywords: " + String.join(",", hits), List.of("keyword_risk"), startedAt);
+            List<String> labels = List.of("keyword_risk");
+            context.mergeDecision(DetectAction.REJECT, labels);
+            return evidence(handlerDefinition.handlerName(), "keyword rule matched", labels, startedAt);
         }
         return pass(handlerDefinition.handlerName(), startedAt);
     }

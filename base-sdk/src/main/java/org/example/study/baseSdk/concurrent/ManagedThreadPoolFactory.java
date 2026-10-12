@@ -1,6 +1,7 @@
 package org.example.study.baseSdk.concurrent;
 
 import java.util.Map;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,6 +22,7 @@ public class ManagedThreadPoolFactory implements DisposableBean {
     private final ThreadPoolDefinition defaultDefinition;
     private final Map<String, ThreadPoolDefinition> definitions;
     private final Map<String, ManagedExecutor> executors = new ConcurrentHashMap<>();
+    private boolean closed;
 
     public ManagedThreadPoolFactory(ThreadPoolProperties properties) {
         this.defaultDefinition = resolveDefinition(properties.getDefaults(), null);
@@ -34,7 +36,10 @@ public class ManagedThreadPoolFactory implements DisposableBean {
     /**
      * 获取或创建具名线程池，同名调用始终返回同一实例。
      */
-    public ThreadPoolExecutor create(String poolName) {
+    public synchronized ThreadPoolExecutor create(String poolName) {
+        if (closed) {
+            throw new IllegalStateException("Managed thread pool factory is closed");
+        }
         String normalizedName = normalizePoolName(poolName);
         return executors.computeIfAbsent(normalizedName, this::newExecutor).executor();
     }
@@ -60,8 +65,22 @@ public class ManagedThreadPoolFactory implements DisposableBean {
 
     @Override
     public void destroy() {
-        executors.values().forEach(this::shutdown);
-        executors.clear();
+        long maximumWait = executors.values().stream().mapToLong(ManagedExecutor::awaitTerminationSeconds).max().orElse(0);
+        shutdown(Duration.ofSeconds(maximumWait));
+    }
+
+    /** 同时关闭所有线程池，在统一截止时间内等待，避免等待时间逐池累加。 */
+    public synchronized void shutdown(Duration budget) {
+        if (closed) {
+            return;
+        }
+        closed = true;
+        long deadline = System.nanoTime() + Math.max(0, budget.toNanos());
+        executors.values().forEach(managed -> managed.executor().shutdown());
+        for (ManagedExecutor managed : executors.values()) {
+            long remaining = Math.max(0, deadline - System.nanoTime());
+            shutdown(managed, Math.min(remaining, TimeUnit.SECONDS.toNanos(managed.awaitTerminationSeconds())));
+        }
     }
 
     private ManagedExecutor newExecutor(String poolName) {
@@ -94,11 +113,11 @@ public class ManagedThreadPoolFactory implements DisposableBean {
                 choose(override == null ? null : override.getAllowCoreThreadTimeout(), choose(defaults.getAllowCoreThreadTimeout(), sdkDefaults.getAllowCoreThreadTimeout())));
     }
 
-    private void shutdown(ManagedExecutor managedExecutor) {
+    private void shutdown(ManagedExecutor managedExecutor, long waitNanos) {
         ThreadPoolExecutor executor = managedExecutor.executor();
         executor.shutdown();
         try {
-            if (!executor.awaitTermination(managedExecutor.awaitTerminationSeconds(), TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(waitNanos, TimeUnit.NANOSECONDS)) {
                 int cancelledTasks = executor.shutdownNow().size();
                 log.warn("Forced managed thread pool shutdown, poolName={}, cancelledTasks={}", managedExecutor.poolName(), cancelledTasks);
             }

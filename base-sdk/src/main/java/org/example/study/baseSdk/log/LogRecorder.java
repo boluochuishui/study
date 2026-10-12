@@ -5,5 +5,5 @@ package org.example.study.baseSdk.log;
  */
 public interface LogRecorder {
 
-    void record(BaseLogEvent event);
+    void log(BaseLogEvent event);
 }

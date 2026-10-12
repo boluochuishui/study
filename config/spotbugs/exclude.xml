@@ -21,8 +21,19 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
         <Field name="dataService"/>
     </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Field name="redisTemplate"/>
+    </Match>
 
     <!-- 构造失败由 Spring 启动过程处理，相关 Bean 不定义 finalizer。 -->
+    <!-- Kafka 注册表由 Spring 管理，生命周期适配器需要共享同一个容器集合。 -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+        <Class name="org.example.study.worker.lifecycle.KafkaLifecycleParticipant"/>
+        <Field name="registry"/>
+    </Match>
+
     <Match>
         <Bug pattern="CT_CONSTRUCTOR_THROW"/>
     </Match>

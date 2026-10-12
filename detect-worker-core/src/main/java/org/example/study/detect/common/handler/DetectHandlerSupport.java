@@ -19,6 +19,10 @@ public abstract class DetectHandlerSupport {
         return ChainNodeResult.success(handlerName, elapsed(startedAt));
     }
 
+    protected ChainNodeResult evidence(String handlerName, String message, List<String> tags, Instant startedAt) {
+        return ChainNodeResult.risk(handlerName, "EVIDENCE", message, tags, false, elapsed(startedAt));
+    }
+
     protected ChainNodeResult review(String handlerName, String message, List<String> tags, Instant startedAt) {
         return ChainNodeResult.risk(handlerName, "REVIEW", message, tags, false, elapsed(startedAt));
     }

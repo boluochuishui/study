@@ -44,6 +44,13 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = normalizedPath(request);
+        return path.equals("/internal/lifecycle/live") || path.equals("/internal/lifecycle/ready")
+                || path.equals("/internal/lifecycle/drain");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         long startNanos = System.nanoTime();

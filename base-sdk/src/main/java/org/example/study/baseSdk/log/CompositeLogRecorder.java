@@ -19,7 +19,7 @@ public class CompositeLogRecorder implements LogRecorder {
     }
 
     @Override
-    public void record(BaseLogEvent event) {
+    public void log(BaseLogEvent event) {
         logSinks.stream()
                 .filter(logSink -> logSink.supports(event))
                 .forEach(logSink -> logSink.record(event));

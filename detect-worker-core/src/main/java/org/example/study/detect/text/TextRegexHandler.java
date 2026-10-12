@@ -5,6 +5,7 @@ import org.example.study.baseSdk.chain.ChainHandlerDefinition;
 import org.example.study.baseSdk.chain.ChainNodeResult;
 import org.example.study.detect.common.handler.DetectHandlerSupport;
 import org.example.study.domain.DetectContext;
+import org.example.study.domain.DetectAction;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -22,8 +23,10 @@ public class TextRegexHandler extends DetectHandlerSupport implements ChainHandl
     @Override
     public ChainNodeResult handle(DetectContext context, ChainHandlerDefinition handlerDefinition) {
         Instant startedAt = Instant.now();
-        if (PHONE_PATTERN.matcher(context.allText()).find()) {
-            return review(handlerDefinition.handlerName(), "phone-like pattern matched", List.of("contact_risk"), startedAt);
+        if (PHONE_PATTERN.matcher(context.detectionText()).find()) {
+            List<String> labels = List.of("contact_risk");
+            context.mergeDecision(DetectAction.REVIEW, labels);
+            return evidence(handlerDefinition.handlerName(), "phone-like pattern matched", labels, startedAt);
         }
         return pass(handlerDefinition.handlerName(), startedAt);
     }

@@ -21,6 +21,9 @@ Each requirement owns a numbered folder:
 017-distributed-modality-services
 018-spel-rule-engine
 019-spel-rule-management-hotload
+020-admin-multitenant-rbac
+021-text-detection-redis-llm
+022-local-kubernetes-deployment
 ```
 
 Every folder should contain:
@@ -52,4 +55,9 @@ verification.md  Test cases and validation results
 | 017 | Distributed Access And Modality Services | Implemented |
 | 018 | Common SpEL Rule Engine | Implemented |
 | 019 | SpEL Rule Management And Hot Load | Implemented |
-| 020 | Admin Multi-tenant RBAC | In Progress |
+| 020 | Admin Multi-tenant RBAC | Implemented |
+| 021 | Text Detection Redis Cache And Async LLM | Implemented |
+| 022 | Local Kubernetes Deployment | Implemented |
+| 023 | Local Kubernetes Operation Guide | Implemented |
+| 024 | Enterprise Admin Console | Implemented |
+| 025 | Graceful Service Lifecycle | Implemented |

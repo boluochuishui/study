@@ -24,7 +24,7 @@ class BaseLogModuleTests {
         LogSink chainSink = new CapturingSink(chainEvents, event -> event.logType() == LogType.CHAIN);
         CompositeLogRecorder recorder = new CompositeLogRecorder(List.of(apiSink, chainSink));
 
-        recorder.record(new BaseLogEvent(
+        recorder.log(new BaseLogEvent(
                 "content-risk",
                 LogType.API,
                 LogLevel.INFO,
@@ -119,7 +119,7 @@ class BaseLogModuleTests {
         private final List<BaseLogEvent> events = new ArrayList<>();
 
         @Override
-        public void record(BaseLogEvent event) {
+        public void log(BaseLogEvent event) {
             events.add(event);
         }
     }

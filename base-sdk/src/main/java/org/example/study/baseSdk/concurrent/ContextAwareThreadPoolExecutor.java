@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.MDC;
+import org.springframework.util.CollectionUtils;
+
 
 /**
  * 在任务提交时捕获 MDC，并在工作线程执行结束后清理上下文。
@@ -42,7 +44,8 @@ final class ContextAwareThreadPoolExecutor extends ThreadPoolExecutor {
 
     private static void restore(Map<String, String> context) {
         MDC.clear();
-        if (context != null && !context.isEmpty()) {
+
+        if (!CollectionUtils.isEmpty(context)) {
             MDC.setContextMap(context);
         }
     }

@@ -30,32 +30,32 @@ public class BizLogChainExecutionListener implements ChainExecutionListener<Chai
 
     @Override
     public void beforeChain(ChainContext context, ChainDefinition definition) {
-        record(context, "CHAIN_START", "chain started", true, 0, Map.of());
+        log(context, "CHAIN_START", "chain started", true, 0, Map.of());
     }
 
     @Override
     public void beforeHandler(ChainContext context, ChainDefinition definition, ChainHandlerDefinition handlerDefinition, String role) {
-        record(context, role + "_START", "handler started", true, 0, handlerAttributes(handlerDefinition, role, null));
+        log(context, role + "_START", "handler started", true, 0, handlerAttributes(handlerDefinition, role, null));
     }
 
     @Override
     public void afterHandler(ChainContext context, ChainDefinition definition, ChainHandlerDefinition handlerDefinition, ChainNodeResult result) {
-        record(context, result.handlerRole() + "_END", "handler ended", result.success(), result.costMillis(), handlerAttributes(handlerDefinition, result.handlerRole(), result));
+        log(context, result.handlerRole() + "_END", "handler ended", result.success(), result.costMillis(), handlerAttributes(handlerDefinition, result.handlerRole(), result));
     }
 
     @Override
     public void onHandlerException(ChainContext context, ChainDefinition definition, ChainHandlerDefinition handlerDefinition, Exception exception) {
-        record(context, "HANDLER_EXCEPTION", exception.getMessage(), false, 0, handlerAttributes(handlerDefinition, "EXECUTE", null));
+        log(context, "HANDLER_EXCEPTION", exception.getMessage(), false, 0, handlerAttributes(handlerDefinition, "EXECUTE", null));
     }
 
     @Override
     public void afterChain(ChainContext context, ChainDefinition definition, ChainExecuteResult result) {
-        record(context, "CHAIN_END", "chain ended", result.success(), result.costMillis(), Map.of("nodeCount", result.nodeResults().size()));
+        log(context, "CHAIN_END", "chain ended", result.success(), result.costMillis(), Map.of("nodeCount", result.nodeResults().size()));
     }
 
-    private void record(ChainContext context, String eventType, String message, boolean success, long costMillis, Map<String, Object> attributes) {
+    private void log(ChainContext context, String eventType, String message, boolean success, long costMillis, Map<String, Object> attributes) {
         var logContext = context.logContext();
-        logRecorder.record(new BaseLogEvent(
+        logRecorder.log(new BaseLogEvent(
                 logContext.logSpace(),
                 LogType.CHAIN,
                 success ? LogLevel.INFO : LogLevel.WARN,

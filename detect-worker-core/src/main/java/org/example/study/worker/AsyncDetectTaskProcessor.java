@@ -1,10 +1,12 @@
 package org.example.study.worker;
 
 import org.example.study.domain.DetectCommand;
+import org.example.study.domain.DetectExecutionMode;
 import org.example.study.domain.DetectResult;
 import org.example.study.domain.DetectResultMessage;
 import org.example.study.domain.DetectTaskMessage;
 import org.example.study.messaging.DetectResultQueue;
+import org.example.study.baseSdk.lifecycle.ServiceLifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,14 +21,23 @@ public class AsyncDetectTaskProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncDetectTaskProcessor.class);
     private final ModalityWorkerService workerService;
     private final DetectResultQueue resultQueue;
+    private final ServiceLifecycleManager lifecycle;
 
-    public AsyncDetectTaskProcessor(ModalityWorkerService workerService, DetectResultQueue resultQueue) {
+    public AsyncDetectTaskProcessor(ModalityWorkerService workerService, DetectResultQueue resultQueue,
+                                    ServiceLifecycleManager lifecycle) {
         this.workerService = workerService;
         this.resultQueue = resultQueue;
+        this.lifecycle = lifecycle;
     }
 
     public void process(DetectTaskMessage task) {
-        DetectResult result = workerService.detect(toCommand(task));
+        try (var lease = lifecycle.acquire()) {
+            processAccepted(task);
+        }
+    }
+
+    private void processAccepted(DetectTaskMessage task) {
+        DetectResult result = workerService.detectAccepted(toCommand(task));
         DetectResultMessage message = new DetectResultMessage(
                 "evt_" + UUID.randomUUID().toString().replace("-", ""),
                 result.degraded() ? "CONTENT_DETECT_FAILED" : "CONTENT_DETECT_COMPLETED", "1.0", Instant.now(),
@@ -42,6 +53,6 @@ public class AsyncDetectTaskProcessor {
     private DetectCommand toCommand(DetectTaskMessage task) {
         return new DetectCommand(task.taskId(), task.clientRequestId(), task.traceId(), task.appId(),
                 task.sceneCode(), task.contentType(), task.text(), task.imageUrl(), task.audioUrl(),
-                task.videoUrl(), task.submittedAt());
+                task.videoUrl(), DetectExecutionMode.ASYNC, task.submittedAt());
     }
 }

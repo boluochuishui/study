@@ -1,0 +1,10 @@
+# 各服务通过 spring.config.import 引入通用上下线参数。
+server:
+  shutdown: graceful
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: ${SHUTDOWN_PHASE_TIMEOUT:45s}
+base-sdk:
+  lifecycle:
+    drain-timeout: ${SERVICE_DRAIN_TIMEOUT:40s}
+    drain-token: ${SERVICE_DRAIN_TOKEN:}

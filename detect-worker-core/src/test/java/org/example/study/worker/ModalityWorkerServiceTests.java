@@ -1,18 +1,24 @@
 package org.example.study.worker;
 
 import org.example.study.baseSdk.chain.ChainExecuteResult;
+import org.example.study.baseSdk.lifecycle.LifecycleProperties;
+import org.example.study.baseSdk.lifecycle.ServiceLifecycleManager;
+import org.example.study.baseSdk.lifecycle.ServiceUnavailableException;
 import org.example.study.detect.common.ModalityDetectRouter;
 import org.example.study.domain.ContentType;
 import org.example.study.domain.DetectAction;
 import org.example.study.domain.DetectCommand;
+import org.example.study.domain.DetectExecutionMode;
 import org.example.study.domain.DetectStatus;
 import org.example.study.messaging.DetectTaskQueue;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -23,7 +29,21 @@ class ModalityWorkerServiceTests {
     private final ModalityDetectRouter router = mock(ModalityDetectRouter.class);
     private final DetectResultMapper mapper = mock(DetectResultMapper.class);
     private final DetectTaskQueue queue = mock(DetectTaskQueue.class);
-    private final ModalityWorkerService service = new ModalityWorkerService(router, mapper, queue);
+    private final ServiceLifecycleManager lifecycle = new ServiceLifecycleManager(List.of(), new LifecycleProperties());
+    private final ModalityWorkerService service = new ModalityWorkerService(router, mapper, queue, lifecycle);
+
+    @BeforeEach
+    void ready() {
+        lifecycle.ready();
+    }
+
+    @Test
+    void drainingRejectsNewDetectionAndQueueSubmission() {
+        lifecycle.beginDrain();
+        assertThatThrownBy(() -> service.detect(command())).isInstanceOf(ServiceUnavailableException.class);
+        assertThatThrownBy(() -> service.submit(command())).isInstanceOf(ServiceUnavailableException.class);
+        assertThat(lifecycle.inFlight()).isZero();
+    }
 
     @Test
     void returnsMappedSynchronousResult() {
@@ -60,6 +80,6 @@ class ModalityWorkerServiceTests {
 
     private DetectCommand command() {
         return new DetectCommand("task", "client", "trace", "app", "scene", ContentType.TEXT,
-                "text", null, null, null, Instant.now());
+                "text", null, null, null, DetectExecutionMode.SYNC, Instant.now());
     }
 }

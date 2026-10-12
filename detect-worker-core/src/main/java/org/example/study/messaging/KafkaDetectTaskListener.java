@@ -20,7 +20,8 @@ public class KafkaDetectTaskListener {
         this.processor = processor;
     }
 
-    @KafkaListener(topics = "${study.worker.kafka.task-topic}", groupId = "${study.worker.kafka.consumer-group}")
+    @KafkaListener(id = "modality-detect-tasks", topics = "${study.worker.kafka.task-topic}",
+            groupId = "${study.worker.kafka.consumer-group}", autoStartup = "false")
     public void consume(String payload) {
         try {
             processor.process(objectMapper.readValue(payload, DetectTaskMessage.class));

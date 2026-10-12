@@ -1,7 +1,9 @@
 package org.example.study.baseSdk.chain.config;
 
+import org.apache.logging.log4j.util.Strings;
 import org.example.study.baseSdk.chain.ChainDefinition;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,13 +19,13 @@ public class DefaultChainDefinitionValidator implements ChainDefinitionValidator
     public void validate(List<ChainDefinition> definitions) {
         Set<String> chainNames = new HashSet<>();
         for (ChainDefinition definition : definitions) {
-            if (definition.chainName() == null || definition.chainName().isBlank()) {
+            if (Strings.isBlank(definition.chainName())) {
                 throw new IllegalArgumentException("Chain name must not be blank");
             }
             if (!chainNames.add(definition.chainName())) {
                 throw new IllegalArgumentException("Duplicated chain name: " + definition.chainName());
             }
-            if (definition.executeHandlers() == null || definition.executeHandlers().isEmpty()) {
+            if (CollectionUtils.isEmpty(definition.executeHandlers())) {
                 throw new IllegalArgumentException("Chain execute.handlers must not be empty: " + definition.chainName());
             }
             definition.executeHandlers().forEach(handlerDefinition -> {

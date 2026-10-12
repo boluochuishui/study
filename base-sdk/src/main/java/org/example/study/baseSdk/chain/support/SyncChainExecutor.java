@@ -47,7 +47,6 @@ public class SyncChainExecutor implements ChainExecutor<ChainContext> {
         return executeResult;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     private ChainNodeResult invokeHandler(ChainContext context, ChainDefinition definition, ChainHandlerDefinition handlerDefinition, String role) {
         executionListener.beforeHandler(context, definition, handlerDefinition, role);
         try {

@@ -2,8 +2,7 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /application
 
-RUN addgroup -S application \\
-    && adduser -S application -G application
+RUN addgroup -S application && adduser -S application -G application
 
 COPY --chown=application:application audio-detect-service/target/audio-detect-service-*.jar application.jar
 

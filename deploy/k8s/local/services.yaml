@@ -1,0 +1,504 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: text-detect-service
+  namespace: content-risk
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: text-detect-service
+  template:
+    metadata:
+      labels:
+        app: text-detect-service
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: application
+          image: content-risk/text-detect-service:local
+          imagePullPolicy: Never
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - >-
+                    wget -q -T 5 -O -
+                    --header="X-Drain-Token: $SERVICE_DRAIN_TOKEN"
+                    --post-data='' http://127.0.0.1:8080/internal/lifecycle/drain;
+                    sleep 5
+          ports:
+            - name: lifecycle
+              containerPort: 8080
+            - name: rpc
+              containerPort: 50051
+          envFrom:
+            - configMapRef:
+                name: content-risk-config
+          env:
+            - name: SERVICE_DRAIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: SERVICE_DRAIN_TOKEN
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: MYSQL_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /internal/lifecycle/live
+              port: 8080
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 160Mi
+            limits:
+              cpu: "1"
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: text-detect-service
+  namespace: content-risk
+spec:
+  selector:
+    app: text-detect-service
+  ports:
+    - name: rpc
+      port: 50051
+      targetPort: rpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-detect-service
+  namespace: content-risk
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: image-detect-service
+  template:
+    metadata:
+      labels:
+        app: image-detect-service
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: application
+          image: content-risk/image-detect-service:local
+          imagePullPolicy: Never
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - >-
+                    wget -q -T 5 -O -
+                    --header="X-Drain-Token: $SERVICE_DRAIN_TOKEN"
+                    --post-data='' http://127.0.0.1:8080/internal/lifecycle/drain;
+                    sleep 5
+          ports:
+            - name: lifecycle
+              containerPort: 8080
+            - name: rpc
+              containerPort: 50052
+          envFrom:
+            - configMapRef:
+                name: content-risk-config
+          env:
+            - name: SERVICE_DRAIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: SERVICE_DRAIN_TOKEN
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: MYSQL_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /internal/lifecycle/live
+              port: 8080
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 160Mi
+            limits:
+              cpu: "1"
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-detect-service
+  namespace: content-risk
+spec:
+  selector:
+    app: image-detect-service
+  ports:
+    - name: rpc
+      port: 50052
+      targetPort: rpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-detect-service
+  namespace: content-risk
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: audio-detect-service
+  template:
+    metadata:
+      labels:
+        app: audio-detect-service
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: application
+          image: content-risk/audio-detect-service:local
+          imagePullPolicy: Never
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - >-
+                    wget -q -T 5 -O -
+                    --header="X-Drain-Token: $SERVICE_DRAIN_TOKEN"
+                    --post-data='' http://127.0.0.1:8080/internal/lifecycle/drain;
+                    sleep 5
+          ports:
+            - name: lifecycle
+              containerPort: 8080
+            - name: rpc
+              containerPort: 50053
+          envFrom:
+            - configMapRef:
+                name: content-risk-config
+          env:
+            - name: SERVICE_DRAIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: SERVICE_DRAIN_TOKEN
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: MYSQL_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /internal/lifecycle/live
+              port: 8080
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 160Mi
+            limits:
+              cpu: "1"
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audio-detect-service
+  namespace: content-risk
+spec:
+  selector:
+    app: audio-detect-service
+  ports:
+    - name: rpc
+      port: 50053
+      targetPort: rpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-detect-service
+  namespace: content-risk
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: video-detect-service
+  template:
+    metadata:
+      labels:
+        app: video-detect-service
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: application
+          image: content-risk/video-detect-service:local
+          imagePullPolicy: Never
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - >-
+                    wget -q -T 5 -O -
+                    --header="X-Drain-Token: $SERVICE_DRAIN_TOKEN"
+                    --post-data='' http://127.0.0.1:8080/internal/lifecycle/drain;
+                    sleep 5
+          ports:
+            - name: lifecycle
+              containerPort: 8080
+            - name: rpc
+              containerPort: 50054
+          envFrom:
+            - configMapRef:
+                name: content-risk-config
+          env:
+            - name: SERVICE_DRAIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: SERVICE_DRAIN_TOKEN
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: MYSQL_PASSWORD
+          startupProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /internal/lifecycle/live
+              port: 8080
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 160Mi
+            limits:
+              cpu: "1"
+              memory: 384Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: video-detect-service
+  namespace: content-risk
+spec:
+  selector:
+    app: video-detect-service
+  ports:
+    - name: rpc
+      port: 50054
+      targetPort: rpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: access-service
+  namespace: content-risk
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: access-service
+  template:
+    metadata:
+      labels:
+        app: access-service
+    spec:
+      terminationGracePeriodSeconds: 120
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:8.4
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until mysqladmin ping -h mysql --silent; do sleep 2; done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      containers:
+        - name: application
+          image: content-risk/access-service:local
+          imagePullPolicy: Never
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - >-
+                    wget -q -T 5 -O -
+                    --header="X-Drain-Token: $SERVICE_DRAIN_TOKEN"
+                    --post-data='' http://127.0.0.1:8080/internal/lifecycle/drain;
+                    sleep 5
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: content-risk-config
+          env:
+            - name: SERVICE_DRAIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: SERVICE_DRAIN_TOKEN
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: MYSQL_PASSWORD
+            - name: AUTH_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: AUTH_APP_ID
+            - name: AUTH_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: AUTH_APP_SECRET
+            - name: MYSQL_MIGRATION_ENABLED
+              value: "true"
+            - name: TEXT_DETECT_RPC_URL
+              value: tri://text-detect-service:50051
+            - name: IMAGE_DETECT_RPC_URL
+              value: tri://image-detect-service:50052
+            - name: AUDIO_DETECT_RPC_URL
+              value: tri://audio-detect-service:50053
+            - name: VIDEO_DETECT_RPC_URL
+              value: tri://video-detect-service:50054
+          startupProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /internal/lifecycle/live
+              port: 8080
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: access-service
+  namespace: content-risk
+spec:
+  type: NodePort
+  selector:
+    app: access-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      nodePort: 30080

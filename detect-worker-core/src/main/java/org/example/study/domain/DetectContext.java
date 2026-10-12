@@ -5,7 +5,10 @@ import lombok.Setter;
 import org.example.study.baseSdk.chain.ChainContext;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Detection-specific context passed across moderation chain handlers.
@@ -21,7 +24,12 @@ public class DetectContext extends ChainContext {
     private final String imageUrl;
     private final String audioUrl;
     private final String videoUrl;
+    private final DetectExecutionMode executionMode;
     private final List<String> derivedTexts = new ArrayList<>();
+    private final Set<String> decisionLabels = new LinkedHashSet<>();
+    private String normalizedText = "";
+    private String contentHash = "";
+    private DetectAction decision = DetectAction.PASS;
 
     public DetectContext(String traceId, String taskId, String appId, DetectRequest request) {
         super(traceId, taskId);
@@ -32,6 +40,7 @@ public class DetectContext extends ChainContext {
         this.imageUrl = request.imageUrl();
         this.audioUrl = request.audioUrl();
         this.videoUrl = request.videoUrl();
+        this.executionMode = DetectExecutionMode.SYNC;
         setLogContext(logContext().withCaller(appId, sceneCode));
     }
 
@@ -44,6 +53,8 @@ public class DetectContext extends ChainContext {
         this.imageUrl = command.imageUrl();
         this.audioUrl = command.audioUrl();
         this.videoUrl = command.videoUrl();
+        this.executionMode = command.executionMode() == null
+                ? DetectExecutionMode.SYNC : command.executionMode();
         setLogContext(logContext().withCaller(appId, sceneCode));
     }
 
@@ -66,5 +77,30 @@ public class DetectContext extends ChainContext {
             builder.append(derivedText);
         }
         return builder.toString();
+    }
+
+    public String detectionText() {
+        return normalizedText.isBlank() ? allText() : normalizedText;
+    }
+
+    public DetectExecutionMode executionMode() {
+        return executionMode;
+    }
+
+    public void mergeDecision(DetectAction action, Collection<String> labels) {
+        if (action.ordinal() > decision.ordinal()) {
+            decision = action;
+        }
+        if (labels != null) {
+            decisionLabels.addAll(labels);
+        }
+    }
+
+    public DetectAction decision() {
+        return decision;
+    }
+
+    public List<String> decisionLabels() {
+        return List.copyOf(decisionLabels);
     }
 }

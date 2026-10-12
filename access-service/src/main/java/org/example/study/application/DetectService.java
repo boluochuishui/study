@@ -50,7 +50,7 @@ public class DetectService {
 
     public DetectResult syncDetect(String appId, DetectRequest request) {
         ContentType type = validator.validate(request, DetectExecutionMode.SYNC);
-        DetectCommand command = command(appId, request, type);
+        DetectCommand command = command(appId, request, type, DetectExecutionMode.SYNC);
         try {
             return switch (type) {
                 case TEXT -> textClient.detect(command);
@@ -66,7 +66,7 @@ public class DetectService {
 
     public AsyncDetectAcceptedResult asyncDetect(String appId, DetectRequest request) {
         ContentType type = validator.validate(request, DetectExecutionMode.ASYNC);
-        DetectCommand command = command(appId, request, type);
+        DetectCommand command = command(appId, request, type, DetectExecutionMode.ASYNC);
         try {
             return switch (type) {
                 case TEXT -> textClient.submit(command);
@@ -84,14 +84,14 @@ public class DetectService {
         }
     }
 
-    private DetectCommand command(String appId, DetectRequest request, ContentType type) {
+    private DetectCommand command(String appId, DetectRequest request, ContentType type, DetectExecutionMode executionMode) {
         return new DetectCommand(idGenerator.nextTaskId(), request.clientRequestId(), idGenerator.nextTraceId(),
                 appId, request.sceneCode(), type, request.text(), request.imageUrl(), request.audioUrl(),
-                request.videoUrl(), Instant.now());
+                request.videoUrl(), executionMode, Instant.now());
     }
 
     private void recordFailure(DetectCommand command, String eventType, RuntimeException exception) {
-        logRecorder.record(new BaseLogEvent(
+        logRecorder.log(new BaseLogEvent(
                 "content-risk", LogType.API, LogLevel.ERROR, command.traceId(), command.taskId(), command.appId(),
                 command.sceneCode(), "access-service", eventType, "Detection RPC failed", false, 0,
                 Map.of("contentType", command.contentType().name(),

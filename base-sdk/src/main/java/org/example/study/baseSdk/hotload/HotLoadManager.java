@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -49,6 +50,7 @@ public class HotLoadManager {
      * 应用就绪后尝试首次全量加载；失败的模块将在下一次轮询重试。
      */
     @EventListener(ApplicationReadyEvent.class)
+    @Order(0)
     public void loadAtStartup() {
         refreshAll();
     }
@@ -74,6 +76,11 @@ public class HotLoadManager {
 
     public HotLoadStatus status(String moduleName) {
         return requiredState(moduleName).status();
+    }
+
+    /** 启动检查要求所有已注册模块至少完成一次全量加载。 */
+    public boolean initialized() {
+        return modules.values().stream().allMatch(module -> module.currentValue() != null);
     }
 
     private ModuleState<?, ?, ?> requiredState(String moduleName) {

@@ -1,5 +1,7 @@
 package org.example.study.baseSdk.chain;
 
+import org.apache.logging.log4j.util.Strings;
+
 import java.util.Map;
 
 /**
@@ -21,7 +23,7 @@ public record ChainLogContext(
     }
 
     public static ChainLogContext empty(String traceId, String taskId) {
-        return new ChainLogContext("content-risk", traceId, taskId, "", "", "", "", Map.of());
+        return new ChainLogContext("content-risk", traceId, taskId, Strings.EMPTY, Strings.EMPTY, Strings.EMPTY, Strings.EMPTY, Map.of());
     }
 
     public ChainLogContext withLogSpace(String logSpace) {

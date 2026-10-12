@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: classpath:service-lifecycle.yaml
   application:
     name: text-detect-service
   datasource:
@@ -15,6 +17,13 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       enable-auto-commit: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: ${REDIS_TIMEOUT:2s}
 
 dubbo:
   application:
@@ -39,6 +48,14 @@ study:
       publish-timeout: ${KAFKA_PUBLISH_TIMEOUT:3s}
 
 detect:
+  text:
+    violation-cache:
+      enabled: ${TEXT_VIOLATION_CACHE_ENABLED:true}
+      key-prefix: ${TEXT_VIOLATION_CACHE_KEY_PREFIX:study:risk:text}
+      decision-version: ${TEXT_DECISION_VERSION:v1}
+      ttl: ${TEXT_VIOLATION_CACHE_TTL:7d}
+    large-model:
+      enabled: ${TEXT_LARGE_MODEL_ENABLED:false}
   rules:
     spel:
       enabled: ${SPEL_RULE_HOTLOAD_ENABLED:false}

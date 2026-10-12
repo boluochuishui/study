@@ -9,6 +9,7 @@ import org.example.study.domain.DetectResult;
 import org.example.study.domain.DetectStatus;
 import org.example.study.domain.DetectTaskMessage;
 import org.example.study.messaging.DetectTaskQueue;
+import org.example.study.baseSdk.lifecycle.ServiceLifecycleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,14 +27,24 @@ public class ModalityWorkerService {
     private final ModalityDetectRouter router;
     private final DetectResultMapper resultMapper;
     private final DetectTaskQueue taskQueue;
+    private final ServiceLifecycleManager lifecycle;
 
-    public ModalityWorkerService(ModalityDetectRouter router, DetectResultMapper resultMapper, DetectTaskQueue taskQueue) {
+    public ModalityWorkerService(ModalityDetectRouter router, DetectResultMapper resultMapper, DetectTaskQueue taskQueue,
+                                 ServiceLifecycleManager lifecycle) {
         this.router = router;
         this.resultMapper = resultMapper;
         this.taskQueue = taskQueue;
+        this.lifecycle = lifecycle;
     }
 
     public DetectResult detect(DetectCommand command) {
+        try (var lease = lifecycle.acquire()) {
+            return detectAccepted(command);
+        }
+    }
+
+    /** 已被异步处理器接收的任务继续完成，不在链内部再次检查准入。 */
+    DetectResult detectAccepted(DetectCommand command) {
         try {
             return resultMapper.from(router.execute(command.contentType(), new DetectContext(command)));
         } catch (RuntimeException exception) {
@@ -44,6 +55,12 @@ public class ModalityWorkerService {
     }
 
     public AsyncDetectAcceptedResult submit(DetectCommand command) {
+        try (var lease = lifecycle.acquire()) {
+            return submitAccepted(command);
+        }
+    }
+
+    private AsyncDetectAcceptedResult submitAccepted(DetectCommand command) {
         DetectTaskMessage message = new DetectTaskMessage(
                 "evt_" + compactUuid(), command.taskId(), command.clientRequestId(), command.traceId(),
                 command.appId(), command.sceneCode(), command.contentType(), command.text(), command.imageUrl(),

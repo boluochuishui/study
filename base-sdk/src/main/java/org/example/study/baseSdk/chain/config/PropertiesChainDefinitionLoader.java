@@ -1,10 +1,12 @@
 package org.example.study.baseSdk.chain.config;
 
+import org.apache.logging.log4j.util.Strings;
 import org.example.study.baseSdk.chain.ChainDefinition;
 import org.example.study.baseSdk.chain.ChainExecuteMode;
 import org.example.study.baseSdk.chain.ChainExceptionPolicy;
 import org.example.study.baseSdk.chain.ChainHandlerDefinition;
 import org.example.study.baseSdk.chain.HandlerReference;
+import org.example.study.baseSdk.constant.BaseChars;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +54,7 @@ public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
     }
 
     private List<ChainHandlerDefinition> parseHandlers(String rawHandlers) {
-        return Arrays.stream(rawHandlers.split(","))
+        return Arrays.stream(rawHandlers.split(BaseChars.COMMA))
                 .map(String::trim)
                 .filter(reference -> !reference.isEmpty())
                 .map(this::toHandlerDefinition)
@@ -60,7 +62,7 @@ public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
     }
 
     private ChainHandlerDefinition optionalHandler(String rawReference) {
-        if (rawReference == null || rawReference.isBlank()) {
+        if (Strings.isBlank(rawReference)) {
             return null;
         }
         return toHandlerDefinition(rawReference);
@@ -72,7 +74,7 @@ public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
     }
 
     private HandlerReference optionalReference(String rawReference) {
-        if (rawReference == null || rawReference.isBlank()) {
+        if (Strings.isBlank(rawReference)) {
             return null;
         }
         return referenceResolver.parse(rawReference);
@@ -80,7 +82,7 @@ public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
 
     private String required(Properties properties, String key) {
         String value = properties.getProperty(key);
-        if (value == null || value.isBlank()) {
+        if (Strings.isBlank(value)) {
             throw new IllegalArgumentException("Missing required chain property: " + key);
         }
         return value.trim();

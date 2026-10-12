@@ -17,6 +17,7 @@ public record DetectCommand(
         String imageUrl,
         String audioUrl,
         String videoUrl,
+        DetectExecutionMode executionMode,
         Instant submittedAt
 ) implements Serializable {
 }

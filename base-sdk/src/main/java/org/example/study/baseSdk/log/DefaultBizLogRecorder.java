@@ -16,6 +16,6 @@ public class DefaultBizLogRecorder implements BizLogRecorder {
 
     @Override
     public void record(BizLogEvent event) {
-        logRecorder.record(event.toBaseLogEvent());
+        logRecorder.log(event.toBaseLogEvent());
     }
 }

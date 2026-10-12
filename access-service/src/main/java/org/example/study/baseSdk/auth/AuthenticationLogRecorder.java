@@ -33,7 +33,7 @@ public class AuthenticationLogRecorder {
 
     private void record(String traceId, String appId, AuthRule rule, String snapshotVersion,
                         boolean success, String message, String failureCode, long costMillis) {
-        logRecorder.record(new BaseLogEvent(
+        logRecorder.log(new BaseLogEvent(
                 "auth",
                 LogType.AUTH,
                 success ? LogLevel.INFO : LogLevel.WARN,

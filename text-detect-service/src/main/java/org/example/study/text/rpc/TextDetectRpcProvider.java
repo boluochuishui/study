@@ -4,6 +4,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.example.study.domain.AsyncDetectAcceptedResult;
 import org.example.study.domain.ContentType;
 import org.example.study.domain.DetectCommand;
+import org.example.study.domain.DetectExecutionMode;
 import org.example.study.domain.DetectResult;
 import org.example.study.rpc.TextDetectRpcService;
 import org.example.study.worker.ModalityWorkerService;
@@ -19,19 +20,22 @@ public class TextDetectRpcProvider implements TextDetectRpcService {
 
     @Override
     public DetectResult detect(DetectCommand command) {
-        requireType(command);
+        requireCommand(command, DetectExecutionMode.SYNC);
         return workerService.detect(command);
     }
 
     @Override
     public AsyncDetectAcceptedResult submit(DetectCommand command) {
-        requireType(command);
+        requireCommand(command, DetectExecutionMode.ASYNC);
         return workerService.submit(command);
     }
 
-    private void requireType(DetectCommand command) {
+    private void requireCommand(DetectCommand command, DetectExecutionMode executionMode) {
         if (command == null || command.contentType() != ContentType.TEXT) {
             throw new IllegalArgumentException("Detection command content type mismatch");
+        }
+        if (command.executionMode() != executionMode) {
+            throw new IllegalArgumentException("Detection command execution mode mismatch");
         }
     }
 }

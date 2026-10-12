@@ -2,8 +2,7 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /application
 
-RUN addgroup -S application \\
-    && adduser -S application -G application
+RUN addgroup -S application && adduser -S application -G application
 
 COPY --chown=application:application video-detect-service/target/video-detect-service-*.jar application.jar
 
