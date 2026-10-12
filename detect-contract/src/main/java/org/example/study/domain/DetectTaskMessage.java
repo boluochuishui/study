@@ -17,6 +17,13 @@ public record DetectTaskMessage(
         String imageUrl,
         String audioUrl,
         String videoUrl,
-        Instant submittedAt
+        Instant submittedAt,
+        BatchDetectCommand batch
 ) {
+    public DetectTaskMessage(String eventId, String taskId, String clientRequestId, String traceId,
+                             String appId, String sceneCode, ContentType contentType, String text,
+                             String imageUrl, String audioUrl, String videoUrl, Instant submittedAt) {
+        this(eventId, taskId, clientRequestId, traceId, appId, sceneCode, contentType,
+                text, imageUrl, audioUrl, videoUrl, submittedAt, null);
+    }
 }

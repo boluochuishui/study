@@ -28,6 +28,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationLogRecorder authenticationLogRecorder;
     private final ObjectMapper objectMapper;
     private final int maxBodyBytes;
+    @Value("${study.detect.batch.max-request-bytes:67108864}")
+    private long maxMultipartBytes = 67108864;
 
     public AuthenticationFilter(
             AuthRuleMatcher ruleMatcher,
@@ -61,7 +63,18 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         String appId = valueOrEmpty(servletRequest.getHeader("X-App-Id"));
 
         try {
-            CachedBodyHttpServletRequest request = new CachedBodyHttpServletRequest(servletRequest, maxBodyBytes);
+            HttpServletRequest request;
+            byte[] signedBody;
+            String contentType = servletRequest.getContentType();
+            if (contentType != null && contentType.toLowerCase(java.util.Locale.ROOT).startsWith("multipart/form-data")) {
+                // 容器解析后保留 Part，后续 Controller 可读取同一文件而非已耗尽的原始流。
+                request = servletRequest;
+                signedBody = MultipartSignatureBody.canonical(request, maxMultipartBytes);
+            } else {
+                var cached = new CachedBodyHttpServletRequest(servletRequest, maxBodyBytes);
+                request = cached;
+                signedBody = cached.body();
+            }
             String path = normalizedPath(request);
             rule = ruleMatcher.match(request.getMethod(), path).orElse(null);
             if (rule == null) {
@@ -71,7 +84,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                     request.getMethod(),
                     path,
                     authenticationHeaders(request),
-                    request.body(),
+                    signedBody,
                     request.getRemoteAddr(),
                     "HTTP"
             );

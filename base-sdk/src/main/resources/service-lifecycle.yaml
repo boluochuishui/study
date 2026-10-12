@@ -5,6 +5,9 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: ${SHUTDOWN_PHASE_TIMEOUT:45s}
 base-sdk:
+  detection-files:
+    root: ${DETECT_FILE_ROOT:${java.io.tmpdir}/study-detect-files}
+    retention: ${DETECT_FILE_RETENTION:24h}
   lifecycle:
     drain-timeout: ${SERVICE_DRAIN_TIMEOUT:40s}
     drain-token: ${SERVICE_DRAIN_TOKEN:}

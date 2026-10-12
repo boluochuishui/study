@@ -37,6 +37,10 @@ public class AsyncDetectTaskProcessor {
     }
 
     private void processAccepted(DetectTaskMessage task) {
+        if (task.batch() != null) {
+            processBatch(task);
+            return;
+        }
         DetectResult result = workerService.detectAccepted(toCommand(task));
         DetectResultMessage message = new DetectResultMessage(
                 "evt_" + UUID.randomUUID().toString().replace("-", ""),
@@ -54,5 +58,25 @@ public class AsyncDetectTaskProcessor {
         return new DetectCommand(task.taskId(), task.clientRequestId(), task.traceId(), task.appId(),
                 task.sceneCode(), task.contentType(), task.text(), task.imageUrl(), task.audioUrl(),
                 task.videoUrl(), DetectExecutionMode.ASYNC, task.submittedAt());
+    }
+
+    private void processBatch(DetectTaskMessage task) {
+        var batch = task.batch();
+        if (!task.taskId().equals(batch.taskId()) || task.contentType() != batch.contentType()
+                || !task.appId().equals(batch.appId()) || batch.executionMode() != DetectExecutionMode.ASYNC) {
+            throw new IllegalArgumentException("Batch task envelope mismatch");
+        }
+        var result = workerService.detectBatchAccepted(batch);
+        boolean degraded = result.results().stream().anyMatch(org.example.study.domain.DetectItemResult::degraded);
+        var action = result.results().stream().map(org.example.study.domain.DetectItemResult::action)
+                .max(java.util.Comparator.comparingInt(Enum::ordinal)).orElse(org.example.study.domain.DetectAction.PASS);
+        var labels = result.results().stream().flatMap(item -> item.labels().stream()).distinct().toList();
+        DetectResultMessage message = new DetectResultMessage("evt_" + UUID.randomUUID().toString().replace("-", ""),
+                "CONTENT_DETECT_COMPLETED", "2.0", Instant.now(), task.appId(), task.taskId(), task.clientRequestId(),
+                task.contentType(), degraded ? org.example.study.domain.DetectStatus.FAILED : org.example.study.domain.DetectStatus.SUCCEEDED,
+                action, labels, degraded, degraded ? "BATCH_ITEM_FAILED" : "",
+                degraded ? "One or more detection items failed" : "", result.results(), "COMPLETED");
+        try { resultQueue.publish(message); }
+        catch (RuntimeException exception) { LOGGER.error("Batch result publish failed, taskId={}", task.taskId(), exception); }
     }
 }

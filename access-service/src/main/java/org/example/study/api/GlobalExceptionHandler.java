@@ -15,6 +15,16 @@ import java.time.Instant;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleUploadSize(org.springframework.web.multipart.MaxUploadSizeExceededException exception) {
+        return response(HttpStatus.PAYLOAD_TOO_LARGE, "REQUEST_BODY_TOO_LARGE", "Upload size limit exceeded");
+    }
+
+    @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,
+            org.springframework.web.multipart.support.MissingServletRequestPartException.class})
+    public ResponseEntity<ApiErrorResponse> handleInvalidBody(Exception exception) {
+        return response(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "Request body or metadata is invalid");
+    }
 
     @ExceptionHandler(DetectRequestException.class)
     public ResponseEntity<ApiErrorResponse> handleDetectRequest(DetectRequestException exception) {

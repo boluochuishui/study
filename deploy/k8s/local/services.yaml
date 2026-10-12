@@ -20,10 +20,19 @@ spec:
         app: text-detect-service
     spec:
       terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: detection-files
+          persistentVolumeClaim:
+            claimName: detection-files
       containers:
         - name: application
           image: content-risk/text-detect-service:local
           imagePullPolicy: Never
+          volumeMounts:
+            - name: detection-files
+              mountPath: /data/detection-files
           lifecycle:
             preStop:
               exec:
@@ -114,10 +123,19 @@ spec:
         app: image-detect-service
     spec:
       terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: detection-files
+          persistentVolumeClaim:
+            claimName: detection-files
       containers:
         - name: application
           image: content-risk/image-detect-service:local
           imagePullPolicy: Never
+          volumeMounts:
+            - name: detection-files
+              mountPath: /data/detection-files
           lifecycle:
             preStop:
               exec:
@@ -208,10 +226,19 @@ spec:
         app: audio-detect-service
     spec:
       terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: detection-files
+          persistentVolumeClaim:
+            claimName: detection-files
       containers:
         - name: application
           image: content-risk/audio-detect-service:local
           imagePullPolicy: Never
+          volumeMounts:
+            - name: detection-files
+              mountPath: /data/detection-files
           lifecycle:
             preStop:
               exec:
@@ -302,10 +329,19 @@ spec:
         app: video-detect-service
     spec:
       terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: detection-files
+          persistentVolumeClaim:
+            claimName: detection-files
       containers:
         - name: application
           image: content-risk/video-detect-service:local
           imagePullPolicy: Never
+          volumeMounts:
+            - name: detection-files
+              mountPath: /data/detection-files
           lifecycle:
             preStop:
               exec:
@@ -396,6 +432,12 @@ spec:
         app: access-service
     spec:
       terminationGracePeriodSeconds: 120
+      securityContext:
+        fsGroup: 1000
+      volumes:
+        - name: detection-files
+          persistentVolumeClaim:
+            claimName: detection-files
       initContainers:
         - name: wait-for-mysql
           image: mysql:8.4
@@ -415,6 +457,9 @@ spec:
         - name: application
           image: content-risk/access-service:local
           imagePullPolicy: Never
+          volumeMounts:
+            - name: detection-files
+              mountPath: /data/detection-files
           lifecycle:
             preStop:
               exec:

@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.MDC;
-import org.springframework.util.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 
 
 /**
@@ -45,7 +45,7 @@ final class ContextAwareThreadPoolExecutor extends ThreadPoolExecutor {
     private static void restore(Map<String, String> context) {
         MDC.clear();
 
-        if (!CollectionUtils.isEmpty(context)) {
+        if (MapUtils.isNotEmpty(context)) {
             MDC.setContextMap(context);
         }
     }

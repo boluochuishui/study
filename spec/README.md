@@ -61,3 +61,5 @@ verification.md  Test cases and validation results
 | 023 | Local Kubernetes Operation Guide | Implemented |
 | 024 | Enterprise Admin Console | Implemented |
 | 025 | Graceful Service Lifecycle | Implemented |
+| 026 | Apache Commons Utilities | Implemented |
+| 027 | Batch And Binary Detection | Implemented |

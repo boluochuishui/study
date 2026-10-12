@@ -1,5 +1,6 @@
 package org.example.study.application;
 
+import org.apache.logging.log4j.util.Strings;
 import org.example.study.domain.ContentType;
 import org.example.study.domain.DetectExecutionMode;
 import org.example.study.domain.DetectRequest;
@@ -49,6 +50,6 @@ public class DetectRequestValidator {
     }
 
     private boolean isBlank(String value) {
-        return value == null || value.isBlank();
+        return Strings.isBlank(value);
     }
 }

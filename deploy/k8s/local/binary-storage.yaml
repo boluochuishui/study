@@ -1,0 +1,12 @@
+# Docker Desktop 单节点可共享 RWO 卷；多节点生产环境必须替换为 RWX 或对象存储。
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: detection-files
+  namespace: content-risk
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

@@ -3,6 +3,7 @@ package org.example.study.rpc;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.example.study.domain.AsyncDetectAcceptedResult;
 import org.example.study.domain.DetectCommand;
+import org.example.study.domain.BatchDetectCommand;
 import org.springframework.stereotype.Component;
 
 /** 音频检测服务客户端。 */
@@ -14,5 +15,9 @@ public class AudioDetectRpcClient {
 
     public AsyncDetectAcceptedResult submit(DetectCommand command) {
         return remote.submit(command);
+    }
+
+    public AsyncDetectAcceptedResult submitBatch(BatchDetectCommand command) {
+        return remote.submitBatch(command);
     }
 }

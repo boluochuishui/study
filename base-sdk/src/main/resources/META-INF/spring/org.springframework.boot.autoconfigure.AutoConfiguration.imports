@@ -1,3 +1,4 @@
 org.example.study.baseSdk.rule.spel.SpelRuleAutoConfiguration
 org.example.study.baseSdk.lifecycle.LifecycleAutoConfiguration
 org.example.study.baseSdk.lifecycle.web.LifecycleWebAutoConfiguration
+org.example.study.baseSdk.storage.DetectionFileAutoConfiguration

@@ -1,6 +1,6 @@
 package org.example.study.baseSdk.chain.config;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.example.study.baseSdk.chain.ChainDefinition;
 import org.example.study.baseSdk.chain.ChainExecuteMode;
 import org.example.study.baseSdk.chain.ChainExceptionPolicy;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Builds chain definitions from *.chain.properties files.
+ * 从 *.chain.properties 配置文件组装责任链定义。
  */
 @Component
 public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
@@ -62,7 +62,7 @@ public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
     }
 
     private ChainHandlerDefinition optionalHandler(String rawReference) {
-        if (Strings.isBlank(rawReference)) {
+        if (StringUtils.isBlank(rawReference)) {
             return null;
         }
         return toHandlerDefinition(rawReference);
@@ -74,7 +74,7 @@ public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
     }
 
     private HandlerReference optionalReference(String rawReference) {
-        if (Strings.isBlank(rawReference)) {
+        if (StringUtils.isBlank(rawReference)) {
             return null;
         }
         return referenceResolver.parse(rawReference);
@@ -82,7 +82,7 @@ public class PropertiesChainDefinitionLoader implements ChainDefinitionLoader {
 
     private String required(Properties properties, String key) {
         String value = properties.getProperty(key);
-        if (Strings.isBlank(value)) {
+        if (StringUtils.isBlank(value)) {
             throw new IllegalArgumentException("Missing required chain property: " + key);
         }
         return value.trim();
