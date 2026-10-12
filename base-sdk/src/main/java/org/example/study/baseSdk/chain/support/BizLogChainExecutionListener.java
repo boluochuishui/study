@@ -55,6 +55,8 @@ public class BizLogChainExecutionListener implements ChainExecutionListener<Chai
 
     private void log(ChainContext context, String eventType, String message, boolean success, long costMillis, Map<String, Object> attributes) {
         var logContext = context.logContext();
+        Map<String, Object> combined = new LinkedHashMap<>(logContext.attributes());
+        combined.putAll(attributes);
         logRecorder.log(new BaseLogEvent(
                 logContext.logSpace(),
                 LogType.CHAIN,
@@ -68,7 +70,7 @@ public class BizLogChainExecutionListener implements ChainExecutionListener<Chai
                 message,
                 success,
                 costMillis,
-                attributes,
+                combined,
                 Instant.now()
         ));
     }

@@ -11,6 +11,7 @@ public final class AdminPermissions {
     public static final String RULE_PUBLISH = "RULE_PUBLISH";
     public static final String IAM_READ = "IAM_READ";
     public static final String IAM_WRITE = "IAM_WRITE";
+    public static final String LOG_READ = "LOG_READ";
 
     private AdminPermissions() {
     }

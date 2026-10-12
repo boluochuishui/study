@@ -1,0 +1,30 @@
+{
+  "index_patterns": ["logs-contentrisk-*"],
+  "data_stream": {},
+  "priority": 300,
+  "template": {
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp": {"type": "date"},
+        "eventId": {"type": "keyword"},
+        "tenantId": {"type": "long"},
+        "serviceName": {"type": "keyword"},
+        "logSpace": {"type": "keyword"},
+        "logType": {"type": "keyword"},
+        "level": {"type": "keyword"},
+        "traceId": {"type": "keyword"},
+        "taskId": {"type": "keyword"},
+        "itemId": {"type": "keyword"},
+        "appId": {"type": "keyword"},
+        "sceneCode": {"type": "keyword"},
+        "source": {"type": "keyword"},
+        "eventType": {"type": "keyword"},
+        "message": {"type": "text"},
+        "success": {"type": "boolean"},
+        "costMillis": {"type": "long"},
+        "handlerName": {"type": "keyword"}
+      }
+    }
+  }
+}

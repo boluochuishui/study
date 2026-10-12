@@ -49,7 +49,7 @@ const groups: Array<{ label: string; items: NavigationItem[] }> = [
   },
   {
     label: 'nav.operations',
-    items: [{ route: '/logs', label: 'nav.logs', icon: FileSearch }],
+    items: [{ route: '/logs', label: 'nav.logs', icon: FileSearch, permission: 'LOG_READ' }],
   },
   {
     label: 'nav.access',

@@ -8,6 +8,9 @@ import type {
   ApiEnvelope,
   AuditFilter,
   AuditLog,
+  LogFilter,
+  LogPage,
+  TaskLogView,
   ConfigItem,
   DashboardSnapshot,
   LoginRequest,
@@ -103,5 +106,20 @@ export const httpAdminApi: AdminApi = {
   async auditLogs(filter: AuditFilter): Promise<AuditLog[]> {
     void filter
     return []
+  },
+  async searchLogs(filter: LogFilter) {
+    return unwrap(
+      (await httpClient.get<ApiEnvelope<LogPage>>('/admin/logs', { params: filter })).data,
+    )
+  },
+  async taskLogs(taskId: string, from: string, to: string) {
+    return unwrap(
+      (
+        await httpClient.get<ApiEnvelope<TaskLogView>>(
+          `/admin/logs/tasks/${encodeURIComponent(taskId)}`,
+          { params: { from, to } },
+        )
+      ).data,
+    )
   },
 }

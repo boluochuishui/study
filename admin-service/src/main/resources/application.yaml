@@ -28,6 +28,11 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 admin:
+  logs:
+    elasticsearch:
+      url: ${LOG_ES_URL:}
+      api-key: ${LOG_ES_API_KEY:}
+      data-stream: ${LOG_ES_DATA_STREAM:logs-contentrisk-*}
   security:
     token-ttl-hours: ${ADMIN_TOKEN_TTL_HOURS:8}
   bootstrap:

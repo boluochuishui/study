@@ -5,6 +5,9 @@ import type {
   AdminUser,
   AuditFilter,
   AuditLog,
+  LogFilter,
+  LogPage,
+  TaskLogView,
   ConfigItem,
   DashboardSnapshot,
   LoginRequest,
@@ -32,4 +35,6 @@ export interface AdminApi {
   roles(): Promise<AdminRole[]>
   permissions(): Promise<PermissionItem[]>
   auditLogs(filter: AuditFilter): Promise<AuditLog[]>
+  searchLogs(filter: LogFilter): Promise<LogPage>
+  taskLogs(taskId: string, from: string, to: string): Promise<TaskLogView>
 }

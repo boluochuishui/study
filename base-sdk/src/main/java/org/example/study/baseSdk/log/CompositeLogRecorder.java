@@ -2,6 +2,8 @@ package org.example.study.baseSdk.log;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -12,6 +14,8 @@ import java.util.List;
 @Component
 public class CompositeLogRecorder implements LogRecorder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompositeLogRecorder.class);
+
     private final List<LogSink> logSinks;
 
     public CompositeLogRecorder(List<LogSink> logSinks) {
@@ -20,8 +24,14 @@ public class CompositeLogRecorder implements LogRecorder {
 
     @Override
     public void log(BaseLogEvent event) {
-        logSinks.stream()
-                .filter(logSink -> logSink.supports(event))
-                .forEach(logSink -> logSink.record(event));
+        for (LogSink sink : logSinks) {
+            try {
+                if (sink.supports(event)) {
+                    sink.record(event);
+                }
+            } catch (RuntimeException exception) {
+                LOGGER.warn("Log sink failed, sink={}", sink.getClass().getName(), exception);
+            }
+        }
     }
 }

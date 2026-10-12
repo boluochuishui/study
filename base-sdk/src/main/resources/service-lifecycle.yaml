@@ -5,6 +5,10 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: ${SHUTDOWN_PHASE_TIMEOUT:45s}
 base-sdk:
+  logs:
+    structured:
+      enabled: ${LOG_STRUCTURED_ENABLED:false}
+    tenant-id: ${LOG_TENANT_ID:0}
   detection-files:
     root: ${DETECT_FILE_ROOT:${java.io.tmpdir}/study-detect-files}
     retention: ${DETECT_FILE_RETENTION:24h}

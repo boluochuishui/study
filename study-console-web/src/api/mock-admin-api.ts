@@ -5,6 +5,7 @@ import type {
   AdminSession,
   AdminUser,
   AuditLog,
+  LogEvent,
   ConfigItem,
   DashboardSnapshot,
   PermissionCode,
@@ -22,6 +23,7 @@ const permissions: PermissionCode[] = [
   'RULE_PUBLISH',
   'IAM_READ',
   'IAM_WRITE',
+  'LOG_READ',
 ]
 
 const identity: AdminIdentity = {
@@ -489,5 +491,67 @@ export const mockAdminApi: AdminApi = {
         return keywordMatched && actionMatched && typeMatched
       }),
     )
+  },
+  async searchLogs(filter) {
+    await wait()
+    const items: LogEvent[] = auditLogs
+      .filter((item) => !filter.taskId || item.taskId.includes(filter.taskId))
+      .filter((item) => !filter.traceId || item.traceId.includes(filter.traceId))
+      .filter((item) => !filter.appId || item.appId.includes(filter.appId))
+      .map((item) => ({
+        eventId: item.id,
+        '@timestamp': new Date(Date.now() - Number(item.id) * 60_000).toISOString(),
+        serviceName: 'study-text-detect',
+        logSpace: 'content-risk',
+        logType: 'CHAIN',
+        level: item.degraded ? 'WARN' : 'INFO',
+        traceId: item.traceId,
+        taskId: item.taskId,
+        itemId: 'item-001',
+        appId: item.appId,
+        sceneCode: item.sceneCode,
+        source: 'text.detect.chain',
+        eventType: 'CHAIN_END',
+        message: item.action,
+        success: !item.degraded,
+        costMillis: item.durationMs,
+      }))
+      .filter((item) => item['@timestamp'] >= filter.from && item['@timestamp'] <= filter.to)
+      .filter((item) => !filter.level || item.level === filter.level)
+      .filter((item) => filter.success === undefined || item.success === filter.success)
+      .filter((item) => !filter.serviceName || item.serviceName === filter.serviceName)
+      .filter((item) => !filter.logSpace || item.logSpace === filter.logSpace)
+    return { items, hasMore: false, nextCursor: '' }
+  },
+  async taskLogs(taskId) {
+    await wait()
+    const event = auditLogs.find((item) => item.taskId === taskId)
+    return {
+      taskId,
+      truncated: false,
+      events: event
+        ? event.nodes.map((node, index) => ({
+            eventId: `${event.id}-${index}`,
+            '@timestamp': new Date(
+              Date.now() - Number(event.id) * 60_000 - (event.nodes.length - index) * 1000,
+            ).toISOString(),
+            serviceName: 'study-text-detect',
+            logSpace: 'content-risk',
+            logType: 'CHAIN',
+            level: node.status === 'error' ? 'ERROR' : 'INFO',
+            traceId: event.traceId,
+            taskId,
+            itemId: 'item-001',
+            appId: event.appId,
+            sceneCode: event.sceneCode,
+            source: 'text.detect.chain',
+            eventType: 'EXECUTE_END',
+            message: node.message,
+            success: node.status !== 'error',
+            costMillis: node.durationMs,
+            handlerName: node.name,
+          }))
+        : [],
+    }
   },
 }
