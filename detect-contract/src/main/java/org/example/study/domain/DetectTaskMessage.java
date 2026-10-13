@@ -1,29 +1,17 @@
 package org.example.study.domain;
 
-import java.time.Instant;
+import java.util.Objects;
 
-/**
- * 投递到内部检测任务 Topic 的消息体。
- */
-public record DetectTaskMessage(
-        String eventId,
-        String taskId,
-        String clientRequestId,
-        String traceId,
-        String appId,
-        String sceneCode,
-        ContentType contentType,
-        String text,
-        String imageUrl,
-        String audioUrl,
-        String videoUrl,
-        Instant submittedAt,
-        BatchDetectCommand batch
-) {
-    public DetectTaskMessage(String eventId, String taskId, String clientRequestId, String traceId,
-                             String appId, String sceneCode, ContentType contentType, String text,
-                             String imageUrl, String audioUrl, String videoUrl, Instant submittedAt) {
-        this(eventId, taskId, clientRequestId, traceId, appId, sceneCode, contentType,
-                text, imageUrl, audioUrl, videoUrl, submittedAt, null);
+/** 内部任务消息使用统一命令，单样本和多样本不再分别投递。 */
+public record DetectTaskMessage(String eventId, DetectCommand command) {
+    public DetectTaskMessage {
+        Objects.requireNonNull(eventId, "Event identifier must not be null");
+        Objects.requireNonNull(command, "Detection command must not be null");
+        if (command.executionMode() != DetectExecutionMode.ASYNC) {
+            throw new IllegalArgumentException("Task command must use asynchronous execution");
+        }
     }
+
+    public String taskId() { return command.taskId(); }
+    public ContentType contentType() { return command.contentType(); }
 }

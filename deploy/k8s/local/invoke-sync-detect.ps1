@@ -20,9 +20,9 @@ $requestBody = [ordered]@{
     clientRequestId = "local-k8s-$([Guid]::NewGuid().ToString('N'))"
     sceneCode = $SceneCode
     contentType = "TEXT"
-    text = $Text
+    items = @(@{ itemId = "one"; text = $Text })
 }
-$body = $requestBody | ConvertTo-Json -Compress
+$body = $requestBody | ConvertTo-Json -Depth 5 -Compress
 $bodyBytes = [Text.Encoding]::UTF8.GetBytes($body)
 $sha256 = [Security.Cryptography.SHA256]::Create()
 $bodyDigest = ConvertTo-LowerHex ($sha256.ComputeHash($bodyBytes))

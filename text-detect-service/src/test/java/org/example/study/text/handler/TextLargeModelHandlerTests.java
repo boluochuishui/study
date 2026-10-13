@@ -57,8 +57,8 @@ class TextLargeModelHandlerTests {
     }
 
     private DetectContext context(DetectExecutionMode mode) {
-        DetectContext context = new DetectContext(new DetectCommand("task", "client", "trace", "app", "scene",
-                ContentType.TEXT, "normal text", null, null, null, mode, Instant.now()));
+        DetectContext context = new DetectContext(new DetectCommand("task", "client", "trace", "app", "scene", ContentType.TEXT, null, null, mode, Instant.now(),
+                java.util.List.of(new org.example.study.domain.DetectItem("one", "normal text", null, null, "", ""))));
         context.setNormalizedText("normal text");
         return context;
     }

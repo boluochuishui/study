@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 
 /** 检查实际文件格式，图片先读取宽高而非整图解码，避免像素炸弹。 */
 @Component
-public class UploadedMediaValidator {
-    private final BatchDetectionProperties limits;
-    public UploadedMediaValidator(BatchDetectionProperties limits) { this.limits = limits; }
+public class MediaSampleValidator {
+    private final DetectionProperties limits;
+    public MediaSampleValidator(DetectionProperties limits) { this.limits = limits; }
 
     public void validate(Path path, ContentType type) throws IOException {
         if (type == ContentType.IMAGE) {

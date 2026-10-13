@@ -1,4 +1,34 @@
+# 本次状态：待开发者验证
+
+2026-10-13 用户取消直接文件上传，并要求请求/响应使用普通类和 Fastjson2 @JSONField。代码和相关测试已修改；按用户明确要求，本次不执行 Maven 构建、测试或质量检查。
+
+以下仅为上一版的历史验证记录，不代表当前工作区已经通过验证。
+
+# 当前方案验证记录
+
+## 2026-10-13 同步单样本与异步多样本修订
+
+- 全 Maven 模块执行 clean verify，退出码 0。
+- Surefire 汇总 127 项：125 项通过，0 失败，0 错误，2 项 MySQL 集成测试因 database.integration.enabled 未启用而跳过。
+- Checkstyle、SpotBugs 通过；access-service 和 admin-service 的 JaCoCo 报告已生成。
+- 真实 Servlet HTTP 测试：同步多样本返回 400 且不调用 RPC；同步单样本使用 results；异步两样本文本仅调用一次 submit 并返回 202。
+- 验证 JSON 原始字节 HMAC 与 multipart part 签名；篡改文件或 Base64 JSON 返回 401。
+- 验证有效 Base64/文件优先于 URL，包括无效备用 URL；RPC 仅携带 fileId，不携带 data。
+- 验证非法 Base64、data URI、折行、损坏媒体、编码/解码/累计体积上限；失败原数据不回退 URL，后续项目继续。
+- 验证请求编号、项目顺序、逐项错误、失败链状态、一个任务消息及一条汇总结果、生命周期在途租约。
+- 验证统一任务消息的 JSON 往返，以及 RPC 命令对同步/音视频数量限制。
+- git diff --check 通过；源码无 BatchDetect、BatchRequestPreparer、BatchDetectionProperties、detectBatch、submitBatch 及旧配置前缀。
+- clean 构建后的 detect-contract、detect-worker-core、access-service Jar 中没有 Batch 类残留。
+- 本次未执行真实 Kafka/Redis/MySQL、跨进程 Dubbo 或 K8s 部署联调；模态启动测试与接入集成测试通过，不代表真实模型或集群部署验证。
+- RPC/内部任务消息是破坏性协议更新，发布时需统一升级接入和四个 Worker，并排空旧 Topic 或启用新 Topic。
+
+以下为早期实现记录，仅用于追溯，不作为当前行为说明。
+
 # 验证记录
+
+## 2026-10-13 控制器合并
+
+将批量 JSON 与 multipart 方法合并至 `DetectController`，删除 `BatchDetectController`。执行 `mvn -pl access-service -am -Dtest=DetectControllerTests,BatchHttpIntegrationTests -Dsurefire.failIfNoSpecifiedTests=false test` 通过，6 项测试无失败；验证单条同步/异步、降级响应、批量 JSON、文件上传验签与异步受理。Checkstyle 通过。路径和协议保持兼容。
 
 ## 自动化验证
 

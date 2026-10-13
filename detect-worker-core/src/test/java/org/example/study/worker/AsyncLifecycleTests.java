@@ -32,7 +32,7 @@ class AsyncLifecycleTests {
         when(worker.detectAccepted(any())).thenAnswer(invocation -> {
             assertThat(lifecycle.inFlight()).isEqualTo(1);
             lifecycle.beginDrain();
-            return DetectResult.degradedPass("task", "TEST", "Test result");
+            return DetectResult.degraded(invocation.getArgument(0), "TEST", "Test result");
         });
         doAnswer(invocation -> {
             assertThat(lifecycle.inFlight()).isEqualTo(1);
@@ -57,7 +57,9 @@ class AsyncLifecycleTests {
     }
 
     private DetectTaskMessage task() {
-        return new DetectTaskMessage("event", "task", "client", "trace", "app", "scene", ContentType.TEXT,
-                "text", null, null, null, Instant.now());
+        return new DetectTaskMessage("event",
+                new org.example.study.domain.DetectCommand("task", "client", "trace", "app", "scene", ContentType.TEXT, null, null,
+                org.example.study.domain.DetectExecutionMode.ASYNC, Instant.now(),
+                java.util.List.of(new org.example.study.domain.DetectItem("one", "text", null, null, "", ""))));
     }
 }

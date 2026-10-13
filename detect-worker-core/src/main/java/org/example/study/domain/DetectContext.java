@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Detection-specific context passed across moderation chain handlers.
+ * 检测业务上下文，随责任链节点传递。
  */
 @Getter
 @Setter
@@ -34,25 +34,30 @@ public class DetectContext extends ChainContext {
     public DetectContext(String traceId, String taskId, String appId, DetectRequest request) {
         super(traceId, taskId);
         this.appId = appId;
-        this.sceneCode = request.sceneCode();
-        this.contentType = ContentType.from(request.contentType());
-        this.text = request.text();
-        this.imageUrl = request.imageUrl();
-        this.audioUrl = request.audioUrl();
-        this.videoUrl = request.videoUrl();
+        this.sceneCode = request.getSceneCode();
+        this.contentType = ContentType.from(request.getContentType());
+        this.text = request.getItems().getFirst().getText();
+        this.imageUrl = contentType == ContentType.IMAGE ? request.getItems().getFirst().getUrl() : null;
+        this.audioUrl = contentType == ContentType.AUDIO ? request.getItems().getFirst().getUrl() : null;
+        this.videoUrl = contentType == ContentType.VIDEO ? request.getItems().getFirst().getUrl() : null;
         this.executionMode = DetectExecutionMode.SYNC;
         setLogContext(logContext().withCaller(appId, sceneCode));
     }
 
     public DetectContext(DetectCommand command) {
+        this(command, command.items().getFirst(), command.items().getFirst().url());
+    }
+
+    /** 每个样本创建独立上下文，文件引用由 Worker 解析后传入。 */
+    public DetectContext(DetectCommand command, DetectItem item, String url) {
         super(command.traceId(), command.taskId());
         this.appId = command.appId();
         this.sceneCode = command.sceneCode();
         this.contentType = command.contentType();
-        this.text = command.text();
-        this.imageUrl = command.imageUrl();
-        this.audioUrl = command.audioUrl();
-        this.videoUrl = command.videoUrl();
+        this.text = item.text();
+        this.imageUrl = contentType == ContentType.IMAGE ? url : null;
+        this.audioUrl = contentType == ContentType.AUDIO ? url : null;
+        this.videoUrl = contentType == ContentType.VIDEO ? url : null;
         this.executionMode = command.executionMode() == null
                 ? DetectExecutionMode.SYNC : command.executionMode();
         setLogContext(logContext().withCaller(appId, sceneCode));

@@ -1,13 +1,13 @@
 spring:
   config:
-    import: classpath:service-lifecycle.yaml
+    import:
+      - classpath:service-lifecycle.yaml
+      - classpath:detection-input.yaml
   application:
     name: access-service
   servlet:
     multipart:
-      max-file-size: ${DETECT_MAX_UPLOAD_FILE_SIZE:50MB}
-      max-request-size: ${DETECT_MAX_UPLOAD_REQUEST_SIZE:64MB}
-      file-size-threshold: 0
+      enabled: false
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:content_risk}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: ${MYSQL_USERNAME:root}
@@ -57,21 +57,11 @@ dubbo:
     retries: 0
 
 study:
-  detect:
-    batch:
-      max-sync-items: ${DETECT_MAX_SYNC_ITEMS:10}
-      max-async-items: ${DETECT_MAX_ASYNC_ITEMS:100}
-      max-text-length: ${DETECT_MAX_TEXT_LENGTH:5000}
-      max-total-text-bytes: ${DETECT_MAX_TOTAL_TEXT_BYTES:262144}
-      max-image-bytes: ${DETECT_MAX_IMAGE_BYTES:10485760}
-      max-media-bytes: ${DETECT_MAX_MEDIA_BYTES:52428800}
-      max-request-bytes: ${DETECT_MAX_REQUEST_BYTES:67108864}
-      max-image-pixels: ${DETECT_MAX_IMAGE_PIXELS:20000000}
   auth:
     # 本地演示凭证通过环境变量覆盖，生产环境应替换为数据库加密凭证源或 STS。
     app-id: ${AUTH_APP_ID:demo-app}
     app-secret: ${AUTH_APP_SECRET:demo-secret}
     clock-skew-seconds: ${AUTH_CLOCK_SKEW_SECONDS:300}
     nonce-ttl-seconds: ${AUTH_NONCE_TTL_SECONDS:600}
-    max-body-bytes: ${AUTH_MAX_BODY_BYTES:5242880}
+    max-body-bytes: ${AUTH_MAX_BODY_BYTES:67108864}
     refresh-delay-millis: ${AUTH_REFRESH_DELAY_MILLIS:30000}

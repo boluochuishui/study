@@ -62,5 +62,5 @@ verification.md  Test cases and validation results
 | 024 | Enterprise Admin Console | Implemented |
 | 025 | Graceful Service Lifecycle | Implemented |
 | 026 | Apache Commons Utilities | Implemented |
-| 027 | Batch And Binary Detection | Implemented |
+| 027 | 检测输入与异步多样本能力 | Implemented |
 | 028 | Elasticsearch Log Center | Implemented |

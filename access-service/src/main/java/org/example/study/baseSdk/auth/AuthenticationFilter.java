@@ -28,15 +28,13 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationLogRecorder authenticationLogRecorder;
     private final ObjectMapper objectMapper;
     private final int maxBodyBytes;
-    @Value("${study.detect.batch.max-request-bytes:67108864}")
-    private long maxMultipartBytes = 67108864;
 
     public AuthenticationFilter(
             AuthRuleMatcher ruleMatcher,
             AuthenticationManager authenticationManager,
             AuthenticationLogRecorder authenticationLogRecorder,
             ObjectMapper objectMapper,
-            @Value("${study.auth.max-body-bytes:5242880}") int maxBodyBytes
+            @Value("${study.auth.max-body-bytes:67108864}") int maxBodyBytes
     ) {
         this.ruleMatcher = ruleMatcher;
         this.authenticationManager = authenticationManager;
@@ -63,19 +61,15 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         String appId = valueOrEmpty(servletRequest.getHeader("X-App-Id"));
 
         try {
-            HttpServletRequest request;
-            byte[] signedBody;
+            String path = normalizedPath(servletRequest);
             String contentType = servletRequest.getContentType();
-            if (contentType != null && contentType.toLowerCase(java.util.Locale.ROOT).startsWith("multipart/form-data")) {
-                // 容器解析后保留 Part，后续 Controller 可读取同一文件而非已耗尽的原始流。
-                request = servletRequest;
-                signedBody = MultipartSignatureBody.canonical(request, maxMultipartBytes);
-            } else {
-                var cached = new CachedBodyHttpServletRequest(servletRequest, maxBodyBytes);
-                request = cached;
-                signedBody = cached.body();
+            if ((path.equals("/api/detect/sync") || path.equals("/api/detect/async"))
+                    && contentType != null && contentType.toLowerCase(java.util.Locale.ROOT).startsWith("multipart/form-data")) {
+                throw new AuthenticationException("UNSUPPORTED_CONTENT_TYPE", "Only JSON detection requests are supported", 415);
             }
-            String path = normalizedPath(request);
+            var cached = new CachedBodyHttpServletRequest(servletRequest, maxBodyBytes);
+            HttpServletRequest request = cached;
+            byte[] signedBody = cached.body();
             rule = ruleMatcher.match(request.getMethod(), path).orElse(null);
             if (rule == null) {
                 throw new AuthenticationException("AUTH_RULE_NOT_MATCHED", "Authentication rule was not matched", 403);

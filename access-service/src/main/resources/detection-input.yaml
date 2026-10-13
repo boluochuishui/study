@@ -1,0 +1,10 @@
+# 输入限制集中维护；同步固定一个样本，不开放数量配置。
+study:
+  detect:
+    max-async-items: ${DETECT_MAX_ASYNC_ITEMS:100}
+    max-text-length: ${DETECT_MAX_TEXT_LENGTH:5000}
+    max-total-text-bytes: ${DETECT_MAX_TOTAL_TEXT_BYTES:262144}
+    max-image-bytes: ${DETECT_MAX_IMAGE_BYTES:10485760}
+    max-media-bytes: ${DETECT_MAX_MEDIA_BYTES:52428800}
+    max-request-bytes: ${DETECT_MAX_REQUEST_BYTES:67108864}
+    max-image-pixels: ${DETECT_MAX_IMAGE_PIXELS:20000000}

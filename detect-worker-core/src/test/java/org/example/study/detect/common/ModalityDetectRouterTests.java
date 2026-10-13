@@ -54,6 +54,7 @@ class ModalityDetectRouterTests {
     private DetectContext textContext() {
         return new DetectContext(
                 "trace-1", "task-1", "app-1",
-                new DetectRequest("request-1", "comment", "TEXT", "normal", null, null, null));
+                new DetectRequest("request-1", "comment", "TEXT", null, null,
+                java.util.List.of(new org.example.study.domain.DetectItemRequest("one", "normal", null, null))));
     }
 }

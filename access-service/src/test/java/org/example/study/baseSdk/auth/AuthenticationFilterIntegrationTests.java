@@ -24,7 +24,7 @@ class AuthenticationFilterIntegrationTests {
 
     private static final String PATH = "/api/detect/sync";
     private static final String BODY = "{\"clientRequestId\":\"auth-test\",\"sceneCode\":\"comment\","
-            + "\"contentType\":\"TEXT\",\"text\":\"normal content\"}";
+            + "\"contentType\":\"TEXT\",\"items\":[{\"itemId\":\"one\",\"text\":\"normal content\"}]}";
 
     @LocalServerPort
     private int port;

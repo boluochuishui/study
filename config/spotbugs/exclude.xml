@@ -51,17 +51,17 @@
     </Match>
     <Match>
         <Bug pattern="EI_EXPOSE_REP2"/>
-        <Class name="org.example.study.application.BatchRequestPreparer"/>
+        <Class name="org.example.study.application.DetectRequestValidator"/>
         <Field name="store"/>
     </Match>
     <Match>
         <Bug pattern="EI_EXPOSE_REP2"/>
-        <Class name="org.example.study.application.BatchRequestPreparer"/>
+        <Class name="org.example.study.application.DetectRequestValidator"/>
         <Field name="limits"/>
     </Match>
     <Match>
         <Bug pattern="EI_EXPOSE_REP2"/>
-        <Class name="org.example.study.application.UploadedMediaValidator"/>
+        <Class name="org.example.study.application.MediaSampleValidator"/>
         <Field name="limits"/>
     </Match>
 </FindBugsFilter>

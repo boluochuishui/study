@@ -15,3 +15,8 @@ base-sdk:
   lifecycle:
     drain-timeout: ${SERVICE_DRAIN_TIMEOUT:40s}
     drain-token: ${SERVICE_DRAIN_TOKEN:}
+
+study:
+  worker:
+    # 请求总预算为软截止时间，单节点仍由责任链自身的超时机制管理。
+    request-timeout-ms: ${DETECT_REQUEST_TIMEOUT_MS:25000}

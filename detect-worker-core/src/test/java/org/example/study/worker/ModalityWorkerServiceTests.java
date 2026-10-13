@@ -41,45 +41,52 @@ class ModalityWorkerServiceTests {
     void drainingRejectsNewDetectionAndQueueSubmission() {
         lifecycle.beginDrain();
         assertThatThrownBy(() -> service.detect(command())).isInstanceOf(ServiceUnavailableException.class);
-        assertThatThrownBy(() -> service.submit(command())).isInstanceOf(ServiceUnavailableException.class);
+        assertThatThrownBy(() -> service.submit(asyncCommand())).isInstanceOf(ServiceUnavailableException.class);
         assertThat(lifecycle.inFlight()).isZero();
     }
 
     @Test
     void returnsMappedSynchronousResult() {
         var chainResult = new ChainExecuteResult("trace", "task", "text.detect.chain", true, List.of(), 1);
-        var expected = new org.example.study.domain.DetectResult(
-                "task", DetectStatus.SUCCEEDED, DetectAction.PASS, List.of(), false, "", "");
+        var expected = new org.example.study.domain.DetectItemResult(
+                "one", DetectStatus.SUCCEEDED, DetectAction.PASS, List.of(), false, "", "");
         when(router.execute(any(), any())).thenReturn(chainResult);
-        when(mapper.from(chainResult)).thenReturn(expected);
+        when(mapper.from("one", chainResult)).thenReturn(expected);
 
-        assertThat(service.detect(command())).isSameAs(expected);
+        assertThat(service.detect(command()).getResults()).containsExactly(expected);
     }
 
     @Test
     void queueFailureDoesNotPromiseResult() {
         when(queue.publish(any())).thenReturn(false);
 
-        var result = service.submit(command());
+        var result = service.submit(asyncCommand());
 
-        assertThat(result.status()).isEqualTo(DetectStatus.FAILED);
-        assertThat(result.degraded()).isTrue();
-        assertThat(result.resultExpected()).isFalse();
-        assertThat(result.errorCode()).isEqualTo("TASK_QUEUE_UNAVAILABLE");
+        assertThat(result.getStatus()).isEqualTo(DetectStatus.FAILED);
+        assertThat(result.isDegraded()).isTrue();
+        assertThat(result.isResultExpected()).isFalse();
+        assertThat(result.getErrorCode()).isEqualTo("TASK_QUEUE_UNAVAILABLE");
     }
 
     @Test
     void queueSuccessReturnsAccepted() {
         when(queue.publish(any())).thenReturn(true);
 
-        var result = service.submit(command());
+        var result = service.submit(asyncCommand());
 
-        assertThat(result.status()).isEqualTo(DetectStatus.ACCEPTED);
-        assertThat(result.resultExpected()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(DetectStatus.ACCEPTED);
+        assertThat(result.isResultExpected()).isTrue();
+    }
+
+    private DetectCommand asyncCommand() {
+        var command = command();
+        return new DetectCommand(command.taskId(), command.clientRequestId(), command.traceId(), command.appId(),
+                command.sceneCode(), command.contentType(), null, null, DetectExecutionMode.ASYNC,
+                command.submittedAt(), command.items());
     }
 
     private DetectCommand command() {
-        return new DetectCommand("task", "client", "trace", "app", "scene", ContentType.TEXT,
-                "text", null, null, null, DetectExecutionMode.SYNC, Instant.now());
+        return new DetectCommand("task", "client", "trace", "app", "scene", ContentType.TEXT, null, null, DetectExecutionMode.SYNC, Instant.now(),
+                java.util.List.of(new org.example.study.domain.DetectItem("one", "text", null, null, "", "")));
     }
 }

@@ -5,8 +5,6 @@ import org.example.study.domain.AsyncDetectAcceptedResult;
 import org.example.study.domain.ContentType;
 import org.example.study.domain.DetectCommand;
 import org.example.study.domain.DetectResult;
-import org.example.study.domain.BatchDetectCommand;
-import org.example.study.domain.BatchDetectResult;
 import org.example.study.rpc.ImageDetectRpcService;
 import org.example.study.worker.ModalityWorkerService;
 
@@ -25,23 +23,8 @@ public class ImageDetectRpcProvider implements ImageDetectRpcService {
         return workerService.detect(command);
     }
 
-    @Override
-    public BatchDetectResult detectBatch(BatchDetectCommand command) {
-        requireBatch(command, org.example.study.domain.DetectExecutionMode.SYNC);
-        return workerService.detectBatch(command);
-    }
 
-    @Override
-    public AsyncDetectAcceptedResult submitBatch(BatchDetectCommand command) {
-        requireBatch(command, org.example.study.domain.DetectExecutionMode.ASYNC);
-        return workerService.submitBatch(command);
-    }
 
-    private void requireBatch(BatchDetectCommand command, org.example.study.domain.DetectExecutionMode mode) {
-        if (command == null || command.contentType() != ContentType.IMAGE || command.executionMode() != mode) {
-            throw new IllegalArgumentException("Batch detection command type or mode mismatch");
-        }
-    }
 
     @Override
     public AsyncDetectAcceptedResult submit(DetectCommand command) {

@@ -49,8 +49,8 @@ public class DetectService {
     }
 
     public DetectResult syncDetect(String appId, DetectRequest request) {
-        ContentType type = validator.validate(request, DetectExecutionMode.SYNC);
-        DetectCommand command = command(appId, request, type, DetectExecutionMode.SYNC);
+        DetectCommand command = command(appId, request, DetectExecutionMode.SYNC);
+        ContentType type = command.contentType();
         try {
             return switch (type) {
                 case TEXT -> textClient.detect(command);
@@ -59,14 +59,14 @@ public class DetectService {
             };
         } catch (RuntimeException exception) {
             recordFailure(command, "SYNC_RPC_DEGRADED", exception);
-            return DetectResult.degradedPass(command.taskId(), "DETECT_SERVICE_UNAVAILABLE",
+            return DetectResult.degraded(command, "DETECT_SERVICE_UNAVAILABLE",
                     "Detection service unavailable");
         }
     }
 
     public AsyncDetectAcceptedResult asyncDetect(String appId, DetectRequest request) {
-        ContentType type = validator.validate(request, DetectExecutionMode.ASYNC);
-        DetectCommand command = command(appId, request, type, DetectExecutionMode.ASYNC);
+        DetectCommand command = command(appId, request, DetectExecutionMode.ASYNC);
+        ContentType type = command.contentType();
         try {
             return switch (type) {
                 case TEXT -> textClient.submit(command);
@@ -84,10 +84,12 @@ public class DetectService {
         }
     }
 
-    private DetectCommand command(String appId, DetectRequest request, ContentType type, DetectExecutionMode executionMode) {
-        return new DetectCommand(idGenerator.nextTaskId(), request.clientRequestId(), idGenerator.nextTraceId(),
-                appId, request.sceneCode(), type, request.text(), request.imageUrl(), request.audioUrl(),
-                request.videoUrl(), executionMode, Instant.now());
+    private DetectCommand command(String appId, DetectRequest request,
+                                  DetectExecutionMode executionMode) {
+        var items = validator.prepare(request, executionMode);
+        return new DetectCommand(idGenerator.nextTaskId(), request.getClientRequestId(), idGenerator.nextTraceId(),
+                appId, request.getSceneCode(), ContentType.from(request.getContentType()), request.getLanguage(), request.getRegion(),
+                executionMode, Instant.now(), items);
     }
 
     private void recordFailure(DetectCommand command, String eventType, RuntimeException exception) {

@@ -52,8 +52,8 @@ class TextDetectionHandlerTests {
     }
 
     private DetectContext context(String text, DetectExecutionMode mode) {
-        return new DetectContext(new DetectCommand("task", "client", "trace", "app", "scene",
-                ContentType.TEXT, text, null, null, null, mode, Instant.now()));
+        return new DetectContext(new DetectCommand("task", "client", "trace", "app", "scene", ContentType.TEXT, null, null, mode, Instant.now(),
+                java.util.List.of(new org.example.study.domain.DetectItem("one", text, null, null, "", ""))));
     }
 
     private ChainHandlerDefinition definition(String name, ChainHandler<?> handler) {

@@ -6,8 +6,6 @@ import org.example.study.domain.ContentType;
 import org.example.study.domain.DetectCommand;
 import org.example.study.domain.DetectExecutionMode;
 import org.example.study.domain.DetectResult;
-import org.example.study.domain.BatchDetectCommand;
-import org.example.study.domain.BatchDetectResult;
 import org.example.study.rpc.TextDetectRpcService;
 import org.example.study.worker.ModalityWorkerService;
 
@@ -26,23 +24,8 @@ public class TextDetectRpcProvider implements TextDetectRpcService {
         return workerService.detect(command);
     }
 
-    @Override
-    public BatchDetectResult detectBatch(BatchDetectCommand command) {
-        requireBatch(command, org.example.study.domain.DetectExecutionMode.SYNC);
-        return workerService.detectBatch(command);
-    }
 
-    @Override
-    public AsyncDetectAcceptedResult submitBatch(BatchDetectCommand command) {
-        requireBatch(command, org.example.study.domain.DetectExecutionMode.ASYNC);
-        return workerService.submitBatch(command);
-    }
 
-    private void requireBatch(BatchDetectCommand command, org.example.study.domain.DetectExecutionMode mode) {
-        if (command == null || command.contentType() != ContentType.TEXT || command.executionMode() != mode) {
-            throw new IllegalArgumentException("Batch detection command type or mode mismatch");
-        }
-    }
 
     @Override
     public AsyncDetectAcceptedResult submit(DetectCommand command) {
