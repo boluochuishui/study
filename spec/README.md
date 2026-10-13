@@ -65,3 +65,5 @@ verification.md  Test cases and validation results
 | 027 | 检测输入与异步多样本能力 | Implemented |
 | 028 | Elasticsearch Log Center | Implemented |
 | 029 | 鉴权模块迁移至 Base SDK | Implemented |
+| 030 | Base SDK 通用脱敏能力 | Implemented |
+| 031 | 管理台在线测试 | Implemented |

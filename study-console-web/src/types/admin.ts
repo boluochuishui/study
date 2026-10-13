@@ -7,6 +7,52 @@ export type PermissionCode =
   | 'IAM_READ'
   | 'IAM_WRITE'
   | 'LOG_READ'
+  | 'TEST_READ'
+  | 'TEST_RUN'
+
+export type DetectContentType = 'TEXT' | 'IMAGE' | 'AUDIO' | 'VIDEO'
+
+export interface OnlineTestProfile {
+  appId: string
+  sceneCode: string
+}
+
+export interface OnlineTestItem {
+  itemId: string
+  text?: string
+  url?: string
+  data?: string
+}
+
+export interface OnlineTestRequest {
+  contentType: DetectContentType
+  executionMode: 'SYNC' | 'ASYNC'
+  language: string
+  region: string
+  items: OnlineTestItem[]
+}
+
+export interface OnlineTestResult {
+  taskId: string | null
+  status: string
+  executionMode: string
+  durationMs: number
+  result: Record<string, unknown>
+}
+
+export interface OnlineTestRecord {
+  id: number
+  contentType: DetectContentType
+  executionMode: string
+  appId: string
+  sceneCode: string
+  itemCount: number
+  taskId: string | null
+  status: string
+  resultJson: string | null
+  durationMs: number
+  createdAt: string
+}
 
 export interface ApiEnvelope<T> {
   code: string

@@ -20,6 +20,11 @@ import type {
   RuleSet,
   RuleValidationResult,
   SaveConfigRequest,
+  DetectContentType,
+  OnlineTestProfile,
+  OnlineTestRequest,
+  OnlineTestResult,
+  OnlineTestRecord,
 } from '@/types/admin'
 
 const EMPTY_DASHBOARD: DashboardSnapshot = {
@@ -121,5 +126,16 @@ export const httpAdminApi: AdminApi = {
         )
       ).data,
     )
+  },
+  async onlineTestProfile(contentType: DetectContentType) {
+    return unwrap((await httpClient.get<ApiEnvelope<OnlineTestProfile>>(
+      `/admin/online-tests/profiles/${contentType}`)).data)
+  },
+  async runOnlineTest(request: OnlineTestRequest) {
+    return unwrap((await httpClient.post<ApiEnvelope<OnlineTestResult>>(
+      '/admin/online-tests', request, { timeout: 45_000 })).data)
+  },
+  async onlineTestRecords() {
+    return unwrap((await httpClient.get<ApiEnvelope<OnlineTestRecord[]>>('/admin/online-tests')).data)
   },
 }

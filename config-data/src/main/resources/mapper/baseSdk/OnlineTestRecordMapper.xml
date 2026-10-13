@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.study.baseSdk.database.mybatis.mapper.OnlineTestRecordMapper">
+    <resultMap id="recordMap" type="org.example.study.baseSdk.database.api.model.OnlineTestRecordData">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long"/>
+            <arg column="tenant_id" javaType="long"/>
+            <arg column="user_id" javaType="long"/>
+            <arg column="content_type" javaType="java.lang.String"/>
+            <arg column="execution_mode" javaType="java.lang.String"/>
+            <arg column="app_id" javaType="java.lang.String"/>
+            <arg column="scene_code" javaType="java.lang.String"/>
+            <arg column="item_count" javaType="int"/>
+            <arg column="task_id" javaType="java.lang.String"/>
+            <arg column="status" javaType="java.lang.String"/>
+            <arg column="result_json" javaType="java.lang.String"/>
+            <arg column="duration_ms" javaType="long"/>
+            <arg column="created_at" javaType="java.time.LocalDateTime"/>
+        </constructor>
+    </resultMap>
+    <insert id="insert">
+        INSERT INTO admin_online_test_record
+        (tenant_id, user_id, content_type, execution_mode, app_id, scene_code, item_count,
+         task_id, status, result_json, duration_ms)
+        VALUES (#{tenantId}, #{userId}, #{contentType}, #{executionMode}, #{appId}, #{sceneCode},
+                #{itemCount}, #{taskId}, #{status}, #{resultJson}, #{durationMs})
+    </insert>
+    <select id="selectRecent" resultMap="recordMap">
+        SELECT id, tenant_id, user_id, content_type, execution_mode, app_id, scene_code,
+               item_count, task_id, status, result_json, duration_ms, created_at
+        FROM admin_online_test_record
+        WHERE tenant_id = #{tenantId}
+        ORDER BY id DESC LIMIT #{limit}
+    </select>
+</mapper>

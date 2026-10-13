@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -23,7 +24,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
     private final AuthenticationLogRecorder authenticationLogRecorder;
     private final ObjectMapper objectMapper;
-    private final AuthWebProperties properties;
+    private final int maxBodyBytes;
+    private final Set<String> skipPaths;
+    private final Set<String> jsonOnlyPaths;
 
     public AuthenticationFilter(
             AuthRuleMatcher ruleMatcher,
@@ -36,13 +39,15 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         this.authenticationManager = authenticationManager;
         this.authenticationLogRecorder = authenticationLogRecorder;
         this.objectMapper = objectMapper;
-        this.properties = properties;
+        this.maxBodyBytes = properties.getMaxBodyBytes();
+        this.skipPaths = Set.copyOf(properties.getSkipPaths());
+        this.jsonOnlyPaths = Set.copyOf(properties.getJsonOnlyPaths());
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = normalizedPath(request);
-        return properties.getSkipPaths().contains(path);
+        return skipPaths.contains(path);
     }
 
     @Override
@@ -58,11 +63,11 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         try {
             String path = normalizedPath(servletRequest);
             String contentType = servletRequest.getContentType();
-            if (properties.getJsonOnlyPaths().contains(path)
+            if (jsonOnlyPaths.contains(path)
                     && contentType != null && contentType.toLowerCase(java.util.Locale.ROOT).startsWith("multipart/form-data")) {
                 throw new AuthenticationException("UNSUPPORTED_CONTENT_TYPE", "Only JSON detection requests are supported", 415);
             }
-            var cached = new CachedBodyHttpServletRequest(servletRequest, properties.getMaxBodyBytes());
+            var cached = new CachedBodyHttpServletRequest(servletRequest, maxBodyBytes);
             HttpServletRequest request = cached;
             byte[] signedBody = cached.body();
             rule = ruleMatcher.match(request.getMethod(), path).orElse(null);

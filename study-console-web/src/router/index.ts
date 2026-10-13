@@ -50,6 +50,12 @@ const routes: RouteRecordRaw[] = [
         meta: { permission: 'LOG_READ', titleKey: 'logs.title' },
       },
       {
+        path: 'online-test',
+        name: 'online-test',
+        component: () => import('@/views/OnlineTestView.vue'),
+        meta: { permission: 'TEST_RUN', titleKey: 'onlineTest.title' },
+      },
+      {
         path: 'iam',
         name: 'iam',
         component: () => import('@/views/IamView.vue'),

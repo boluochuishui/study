@@ -28,6 +28,12 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 admin:
+  online-test:
+    access-url: ${ONLINE_TEST_ACCESS_URL:http://localhost:8080}
+    credentials:
+      default:
+        app-id: ${ONLINE_TEST_APP_ID:demo-app}
+        secret: ${ONLINE_TEST_APP_SECRET:demo-secret}
   logs:
     elasticsearch:
       url: ${LOG_ES_URL:}

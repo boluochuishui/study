@@ -32,6 +32,7 @@
 		<commons-collections4.version>4.6.0</commons-collections4.version>
 		<dubbo.version>3.3.6</dubbo.version>
 		<fastjson2.version>2.0.56</fastjson2.version>
+		<hutool.version>5.8.47</hutool.version>
 		<mybatis-plus.version>3.5.17</mybatis-plus.version>
 		<maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
 		<spotbugs-maven-plugin.version>4.9.8.2</spotbugs-maven-plugin.version>
@@ -42,6 +43,11 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>cn.hutool</groupId>
+				<artifactId>hutool-core</artifactId>
+				<version>${hutool.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>com.alibaba.fastjson2</groupId>
 				<artifactId>fastjson2</artifactId>

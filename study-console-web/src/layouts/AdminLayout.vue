@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   Settings2,
+  FlaskConical,
   UsersRound,
 } from '@lucide/vue'
 
@@ -49,7 +50,10 @@ const groups: Array<{ label: string; items: NavigationItem[] }> = [
   },
   {
     label: 'nav.operations',
-    items: [{ route: '/logs', label: 'nav.logs', icon: FileSearch, permission: 'LOG_READ' }],
+    items: [
+      { route: '/online-test', label: 'nav.onlineTest', icon: FlaskConical, permission: 'TEST_RUN' },
+      { route: '/logs', label: 'nav.logs', icon: FileSearch, permission: 'LOG_READ' },
+    ],
   },
   {
     label: 'nav.access',

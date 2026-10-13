@@ -13,6 +13,9 @@ import type {
   RuleDraft,
   RuleRelease,
   RuleSet,
+  DetectContentType,
+  OnlineTestProfile,
+  OnlineTestRecord,
 } from '@/types/admin'
 
 const permissions: PermissionCode[] = [
@@ -24,7 +27,17 @@ const permissions: PermissionCode[] = [
   'IAM_READ',
   'IAM_WRITE',
   'LOG_READ',
+  'TEST_READ',
+  'TEST_RUN',
 ]
+
+const testProfiles: Partial<Record<DetectContentType, OnlineTestProfile>> = {
+  TEXT: { appId: 'demo-app', sceneCode: 'text.default' },
+  IMAGE: { appId: 'demo-app', sceneCode: 'image.default' },
+  AUDIO: { appId: 'demo-app', sceneCode: 'audio.default' },
+  VIDEO: { appId: 'demo-app', sceneCode: 'video.default' },
+}
+const testRecords: OnlineTestRecord[] = []
 
 const identity: AdminIdentity = {
   tenantId: 1,
@@ -364,6 +377,31 @@ const wait = () => new Promise((resolve) => setTimeout(resolve, 180))
 const clone = <T>(value: T): T => structuredClone(value)
 
 export const mockAdminApi: AdminApi = {
+  async onlineTestProfile(contentType) {
+    await wait()
+    const saved = configs.find((item) => item.namespace === 'console.online-test' && item.configKey === contentType)
+    return clone(saved ? JSON.parse(saved.configValue) as OnlineTestProfile
+      : testProfiles[contentType] ?? { appId: '', sceneCode: '' })
+  },
+  async runOnlineTest(request) {
+    await wait()
+    const taskId = crypto.randomUUID()
+    const asyncMode = request.executionMode === 'ASYNC'
+    const result = asyncMode
+      ? { taskId, status: 'ACCEPTED', resultExpected: true }
+      : { taskId, status: 'SUCCEEDED', results: request.items.map((item) => ({ itemId: item.itemId, action: 'PASS' })) }
+    testRecords.unshift({ id: Date.now(), contentType: request.contentType,
+      executionMode: request.executionMode, appId: testProfiles[request.contentType]?.appId ?? '',
+      sceneCode: testProfiles[request.contentType]?.sceneCode ?? '', itemCount: request.items.length,
+      taskId, status: result.status, resultJson: JSON.stringify(result), durationMs: 180,
+      createdAt: new Date().toISOString() })
+    return { taskId, status: result.status, executionMode: request.executionMode,
+      durationMs: 180, result }
+  },
+  async onlineTestRecords() {
+    await wait()
+    return clone(testRecords)
+  },
   async login(request) {
     await wait()
     if (!request.tenantCode || !request.username || !request.password) {

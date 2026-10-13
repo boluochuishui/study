@@ -17,6 +17,11 @@ import type {
   RuleSet,
   RuleValidationResult,
   SaveConfigRequest,
+  DetectContentType,
+  OnlineTestProfile,
+  OnlineTestRequest,
+  OnlineTestResult,
+  OnlineTestRecord,
 } from '@/types/admin'
 
 export interface AdminApi {
@@ -37,4 +42,7 @@ export interface AdminApi {
   auditLogs(filter: AuditFilter): Promise<AuditLog[]>
   searchLogs(filter: LogFilter): Promise<LogPage>
   taskLogs(taskId: string, from: string, to: string): Promise<TaskLogView>
+  onlineTestProfile(contentType: DetectContentType): Promise<OnlineTestProfile>
+  runOnlineTest(request: OnlineTestRequest): Promise<OnlineTestResult>
+  onlineTestRecords(): Promise<OnlineTestRecord[]>
 }
