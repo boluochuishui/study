@@ -1,6 +1,8 @@
-package org.example.study.baseSdk.auth;
+package org.example.study.access.auth;
 
 import tools.jackson.databind.ObjectMapper;
+import org.example.study.baseSdk.auth.AuthConfigSnapshot;
+import org.example.study.baseSdk.auth.AuthConfigSource;
 import org.example.study.baseSdk.database.api.service.ConfigDataService;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;

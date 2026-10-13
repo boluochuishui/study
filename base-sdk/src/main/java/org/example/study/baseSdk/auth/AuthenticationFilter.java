@@ -5,10 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.study.api.ApiErrorResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -20,34 +17,32 @@ import java.util.UUID;
 /**
  * 位于 Controller 之前的系统级鉴权入口。
  */
-@Component
 public class AuthenticationFilter extends OncePerRequestFilter {
 
     private final AuthRuleMatcher ruleMatcher;
     private final AuthenticationManager authenticationManager;
     private final AuthenticationLogRecorder authenticationLogRecorder;
     private final ObjectMapper objectMapper;
-    private final int maxBodyBytes;
+    private final AuthWebProperties properties;
 
     public AuthenticationFilter(
             AuthRuleMatcher ruleMatcher,
             AuthenticationManager authenticationManager,
             AuthenticationLogRecorder authenticationLogRecorder,
             ObjectMapper objectMapper,
-            @Value("${study.auth.max-body-bytes:67108864}") int maxBodyBytes
+            AuthWebProperties properties
     ) {
         this.ruleMatcher = ruleMatcher;
         this.authenticationManager = authenticationManager;
         this.authenticationLogRecorder = authenticationLogRecorder;
         this.objectMapper = objectMapper;
-        this.maxBodyBytes = maxBodyBytes;
+        this.properties = properties;
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = normalizedPath(request);
-        return path.equals("/internal/lifecycle/live") || path.equals("/internal/lifecycle/ready")
-                || path.equals("/internal/lifecycle/drain");
+        return properties.getSkipPaths().contains(path);
     }
 
     @Override
@@ -63,11 +58,11 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         try {
             String path = normalizedPath(servletRequest);
             String contentType = servletRequest.getContentType();
-            if ((path.equals("/api/detect/sync") || path.equals("/api/detect/async"))
+            if (properties.getJsonOnlyPaths().contains(path)
                     && contentType != null && contentType.toLowerCase(java.util.Locale.ROOT).startsWith("multipart/form-data")) {
                 throw new AuthenticationException("UNSUPPORTED_CONTENT_TYPE", "Only JSON detection requests are supported", 415);
             }
-            var cached = new CachedBodyHttpServletRequest(servletRequest, maxBodyBytes);
+            var cached = new CachedBodyHttpServletRequest(servletRequest, properties.getMaxBodyBytes());
             HttpServletRequest request = cached;
             byte[] signedBody = cached.body();
             rule = ruleMatcher.match(request.getMethod(), path).orElse(null);
@@ -115,8 +110,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         response.setStatus(exception.status());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-        objectMapper.writeValue(response.getOutputStream(),
-                new ApiErrorResponse(exception.errorCode(), exception.getMessage(), Instant.now()));
+        objectMapper.writeValue(response.getOutputStream(), Map.of(
+                "code", exception.errorCode(),
+                "message", exception.getMessage(),
+                "occurredAt", Instant.now()));
     }
 
     private String valueOrEmpty(String value) {

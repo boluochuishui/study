@@ -1,6 +1,5 @@
 package org.example.study.baseSdk.auth;
 
-import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -11,7 +10,6 @@ import java.util.HexFormat;
 /**
  * 提供与业务 DTO 无关的 HMAC-SHA256 签名计算。
  */
-@Component
 public class HmacSignatureService {
 
     public String canonicalPayload(AuthenticationRequest request, String appId, String timestamp, String nonce) {

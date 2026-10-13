@@ -4,7 +4,6 @@ import org.example.study.baseSdk.log.BaseLogEvent;
 import org.example.study.baseSdk.log.LogLevel;
 import org.example.study.baseSdk.log.LogRecorder;
 import org.example.study.baseSdk.log.LogType;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.Map;
 /**
  * 记录不包含密钥、Token 和签名原文的结构化鉴权日志。
  */
-@Component
 public class AuthenticationLogRecorder {
 
     private final LogRecorder logRecorder;

@@ -3,7 +3,7 @@ package org.example.study.baseSdk.database;
 import org.example.study.baseSdk.database.api.model.SaveConfigItemCommand;
 import org.example.study.baseSdk.database.api.service.ConfigDataService;
 import org.example.study.baseSdk.auth.AuthMode;
-import org.example.study.baseSdk.auth.DatabaseAuthConfigSource;
+import org.example.study.access.auth.DatabaseAuthConfigSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;

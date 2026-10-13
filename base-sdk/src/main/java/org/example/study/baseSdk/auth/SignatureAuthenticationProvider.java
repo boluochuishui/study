@@ -1,7 +1,6 @@
 package org.example.study.baseSdk.auth;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Set;
@@ -9,7 +8,6 @@ import java.util.Set;
 /**
  * 校验长期 AK/SK 请求签名，并使用 nonce 阻止窗口期内的请求重放。
  */
-@Component
 public class SignatureAuthenticationProvider implements AuthenticationProvider {
 
     private final CredentialProvider credentialProvider;

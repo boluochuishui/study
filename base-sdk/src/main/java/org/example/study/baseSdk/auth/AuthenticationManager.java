@@ -1,6 +1,5 @@
 package org.example.study.baseSdk.auth;
 
-import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map;
 /**
  * 根据规则模式路由到唯一的认证 Provider。
  */
-@Component
 public class AuthenticationManager {
 
     private final Map<AuthMode, AuthenticationProvider> providers;

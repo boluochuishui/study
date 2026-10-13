@@ -1,14 +1,12 @@
 package org.example.study.baseSdk.auth;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 /**
  * 个人开发环境的凭证源，密钥由环境变量注入且不写入数据库。
  */
-@Component
 public class EnvironmentCredentialProvider implements CredentialProvider {
 
     private final String appId;

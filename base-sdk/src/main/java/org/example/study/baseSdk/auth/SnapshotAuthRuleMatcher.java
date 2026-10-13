@@ -4,12 +4,10 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.http.server.PathContainer;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -20,21 +18,22 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * 使用原子引用维护预编译规则，刷新失败时继续使用上一有效快照。
  */
-@Component
 public class SnapshotAuthRuleMatcher implements AuthRuleMatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapshotAuthRuleMatcher.class);
     private final AuthConfigSource configSource;
+    private final AuthConfigSnapshot bootstrapSnapshot;
     private final PathPatternParser parser = new PathPatternParser();
     private final AtomicReference<CompiledSnapshot> current = new AtomicReference<>();
 
-    public SnapshotAuthRuleMatcher(AuthConfigSource configSource) {
+    public SnapshotAuthRuleMatcher(AuthConfigSource configSource, AuthConfigSnapshot bootstrapSnapshot) {
         this.configSource = configSource;
+        this.bootstrapSnapshot = bootstrapSnapshot;
     }
 
     @PostConstruct
     void initialize() {
-        current.set(compile(bootstrapSnapshot()));
+        current.set(compile(bootstrapSnapshot));
     }
 
     @Scheduled(initialDelayString = "${study.auth.refresh-delay-millis:30000}",
@@ -92,25 +91,6 @@ public class SnapshotAuthRuleMatcher implements AuthRuleMatcher {
         AuthRule normalized = new AuthRule(rule.ruleId(), rule.name(), rule.pathPattern(), normalizedMethods,
                 rule.authMode(), rule.options(), rule.priority(), true);
         return new CompiledRule(normalized, parser.parse(normalized.pathPattern()));
-    }
-
-    private AuthConfigSnapshot bootstrapSnapshot() {
-        return new AuthConfigSnapshot(
-                "bootstrap-v1",
-                Instant.EPOCH,
-                "system",
-                List.of(
-                        new AuthRule("detect-sync", "同步检测", "/api/detect/sync", Set.of("POST"),
-                                AuthMode.SIGNATURE, java.util.Map.of("requiredPermission", "detect:sync"), 10, true),
-                        new AuthRule("detect-async", "异步检测", "/api/detect/async", Set.of("POST"),
-                                AuthMode.SIGNATURE, java.util.Map.of("requiredPermission", "detect:async"), 20, true),
-                        new AuthRule("health-liveness", "存活检查", "/actuator/health/liveness", Set.of("GET"),
-                                AuthMode.ANONYMOUS, java.util.Map.of(), 100, true),
-                        new AuthRule("health-readiness", "就绪检查", "/actuator/health/readiness", Set.of("GET"),
-                                AuthMode.ANONYMOUS, java.util.Map.of(), 110, true)
-                ),
-                "bootstrap"
-        );
     }
 
     private record CompiledSnapshot(String version, List<CompiledRule> rules) {

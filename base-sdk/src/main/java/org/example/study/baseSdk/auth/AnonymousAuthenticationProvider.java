@@ -1,13 +1,11 @@
 package org.example.study.baseSdk.auth;
 
-import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 /**
  * 显式匿名规则的认证实现。
  */
-@Component
 public class AnonymousAuthenticationProvider implements AuthenticationProvider {
 
     @Override

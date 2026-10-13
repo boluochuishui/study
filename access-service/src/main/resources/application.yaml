@@ -58,6 +58,14 @@ dubbo:
 
 study:
   auth:
+    enabled: true
+    skip-paths:
+      - /internal/lifecycle/live
+      - /internal/lifecycle/ready
+      - /internal/lifecycle/drain
+    json-only-paths:
+      - /api/detect/sync
+      - /api/detect/async
     # 本地演示凭证通过环境变量覆盖，生产环境应替换为数据库加密凭证源或 STS。
     app-id: ${AUTH_APP_ID:demo-app}
     app-secret: ${AUTH_APP_SECRET:demo-secret}
