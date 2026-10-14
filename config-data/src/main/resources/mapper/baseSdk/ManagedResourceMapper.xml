@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.study.baseSdk.database.mybatis.mapper.ManagedResourceMapper">
+    <!-- table 与 column 均由 ManagedResource 白名单提供，不能接收原始请求值。 -->
+    <select id="list" resultType="java.util.LinkedHashMap">
+        SELECT * FROM ${table}
+        WHERE tenant_id = #{tenantId} AND deleted = 0
+        ORDER BY id DESC LIMIT 500
+    </select>
+    <select id="find" resultType="java.util.LinkedHashMap">
+        SELECT * FROM ${table}
+        WHERE tenant_id = #{tenantId} AND id = #{id} AND deleted = 0
+        LIMIT 1
+    </select>
+    <select id="hasEnabledReference" resultType="java.lang.Integer">
+        SELECT 1 FROM ${table}
+        WHERE tenant_id = #{tenantId} AND ${column} = #{id} AND enabled = 1 AND deleted = 0
+        LIMIT 1
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="mutation.id" keyColumn="id">
+        INSERT INTO ${mutation.table}
+        (tenant_id, created_by, updated_by,
+        <foreach collection="mutation.fields" item="field" separator=",">${field.column}</foreach>)
+        VALUES (#{mutation.tenantId}, #{mutation.actorId}, #{mutation.actorId},
+        <foreach collection="mutation.fields" item="field" separator=",">#{field.value}</foreach>)
+    </insert>
+    <update id="update">
+        UPDATE ${mutation.table}
+        SET updated_by = #{mutation.actorId}, updated_at = CURRENT_TIMESTAMP(3),
+            version = version + 1,
+        <foreach collection="mutation.fields" item="field" separator=",">${field.column} = #{field.value}</foreach>
+        WHERE tenant_id = #{mutation.tenantId} AND id = #{mutation.id}
+          AND version = #{mutation.version} AND deleted = 0
+    </update>
+</mapper>

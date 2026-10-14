@@ -242,6 +242,21 @@ public class SpelRuleDataServiceImpl implements SpelRuleDataService {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<SpelRuleReleaseData> findReleaseById(long tenantId, long releaseId) {
+        validateTenantId(tenantId);
+        if (releaseId < 1) {
+            throw new IllegalArgumentException("SpEL release ID must be positive");
+        }
+        try {
+            return Optional.ofNullable(releaseMapper.selectByIdForTenant(tenantId, releaseId))
+                    .map(this::toReleaseData);
+        } catch (DataAccessException exception) {
+            throw databaseFailure("Failed to query SpEL rule release", exception);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<SpelRuleReleaseData> listLatestReleases(long tenantId, String scene) {
         validateTenantId(tenantId);
         requireText(scene, "SpEL rule scene must not be blank");

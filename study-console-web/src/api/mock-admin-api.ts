@@ -16,6 +16,8 @@ import type {
   DetectContentType,
   OnlineTestProfile,
   OnlineTestRecord,
+  ManagedResource,
+  ManagedRecord,
 } from '@/types/admin'
 
 const permissions: PermissionCode[] = [
@@ -38,6 +40,15 @@ const testProfiles: Partial<Record<DetectContentType, OnlineTestProfile>> = {
   VIDEO: { appId: 'demo-app', sceneCode: 'video.default' },
 }
 const testRecords: OnlineTestRecord[] = []
+const managedData: Record<ManagedResource, ManagedRecord[]> = {
+  apps: [],
+  scenes: [],
+  rules: [],
+  libraries: [],
+  assets: [],
+  memberships: [],
+}
+let managedNextId = 1
 
 const identity: AdminIdentity = {
   tenantId: 1,
@@ -377,11 +388,47 @@ const wait = () => new Promise((resolve) => setTimeout(resolve, 180))
 const clone = <T>(value: T): T => structuredClone(value)
 
 export const mockAdminApi: AdminApi = {
+  async managedRecords(resource) {
+    await wait()
+    return clone(managedData[resource])
+  },
+  async createManagedRecord(resource, request) {
+    await wait()
+    const record: ManagedRecord = {
+      ...request.values,
+      id: managedNextId++,
+      version: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+    managedData[resource].unshift(record)
+    return clone(record)
+  },
+  async updateManagedRecord(resource, id, request) {
+    await wait()
+    const index = managedData[resource].findIndex((item) => item.id === id)
+    if (index < 0) throw new Error('Managed record not found')
+    const old = managedData[resource][index]!
+    if (old.version !== request.version) throw new Error('Managed record was modified')
+    const record: ManagedRecord = {
+      ...old,
+      ...request.values,
+      version: request.version + 1,
+      updated_at: new Date().toISOString(),
+    }
+    managedData[resource][index] = record
+    return clone(record)
+  },
   async onlineTestProfile(contentType) {
     await wait()
-    const saved = configs.find((item) => item.namespace === 'console.online-test' && item.configKey === contentType)
-    return clone(saved ? JSON.parse(saved.configValue) as OnlineTestProfile
-      : testProfiles[contentType] ?? { appId: '', sceneCode: '' })
+    const saved = configs.find(
+      (item) => item.namespace === 'console.online-test' && item.configKey === contentType,
+    )
+    return clone(
+      saved
+        ? (JSON.parse(saved.configValue) as OnlineTestProfile)
+        : (testProfiles[contentType] ?? { appId: '', sceneCode: '' }),
+    )
   },
   async runOnlineTest(request) {
     await wait()
@@ -389,14 +436,31 @@ export const mockAdminApi: AdminApi = {
     const asyncMode = request.executionMode === 'ASYNC'
     const result = asyncMode
       ? { taskId, status: 'ACCEPTED', resultExpected: true }
-      : { taskId, status: 'SUCCEEDED', results: request.items.map((item) => ({ itemId: item.itemId, action: 'PASS' })) }
-    testRecords.unshift({ id: Date.now(), contentType: request.contentType,
-      executionMode: request.executionMode, appId: testProfiles[request.contentType]?.appId ?? '',
-      sceneCode: testProfiles[request.contentType]?.sceneCode ?? '', itemCount: request.items.length,
-      taskId, status: result.status, resultJson: JSON.stringify(result), durationMs: 180,
-      createdAt: new Date().toISOString() })
-    return { taskId, status: result.status, executionMode: request.executionMode,
-      durationMs: 180, result }
+      : {
+          taskId,
+          status: 'SUCCEEDED',
+          results: request.items.map((item) => ({ itemId: item.itemId, action: 'PASS' })),
+        }
+    testRecords.unshift({
+      id: Date.now(),
+      contentType: request.contentType,
+      executionMode: request.executionMode,
+      appId: testProfiles[request.contentType]?.appId ?? '',
+      sceneCode: testProfiles[request.contentType]?.sceneCode ?? '',
+      itemCount: request.items.length,
+      taskId,
+      status: result.status,
+      resultJson: JSON.stringify(result),
+      durationMs: 180,
+      createdAt: new Date().toISOString(),
+    })
+    return {
+      taskId,
+      status: result.status,
+      executionMode: request.executionMode,
+      durationMs: 180,
+      result,
+    }
   },
   async onlineTestRecords() {
     await wait()

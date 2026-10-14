@@ -12,6 +12,15 @@ export type PermissionCode =
 
 export type DetectContentType = 'TEXT' | 'IMAGE' | 'AUDIO' | 'VIDEO'
 
+export type ManagedResource = 'apps' | 'scenes' | 'rules' | 'libraries' | 'assets' | 'memberships'
+
+export type ManagedRecord = Record<string, string | number | boolean | null>
+
+export interface SaveManagedRecordRequest {
+  version: number
+  values: Record<string, string | number | boolean | null>
+}
+
 export interface OnlineTestProfile {
   appId: string
   sceneCode: string

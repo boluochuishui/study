@@ -33,6 +33,8 @@ HTTP -> access-service -> Dubbo submit -> modality Kafka task topic -> modality 
 
 ## 可用性语义
 
+启动、同步调用、异步入队与降级的详细交互见 [时序图](sequence-diagram.md)。该文档按当前代码补充，包含后续需求调整后的逐样本结果格式。
+
 同步 RPC 关闭自动重试，异常时返回 `FAILED + PASS + degraded=true`，错误码为 `DETECT_SERVICE_UNAVAILABLE`。异步只有 Kafka Broker 确认写入后才返回 HTTP 202、`ACCEPTED` 和 `resultExpected=true`；RPC 或 Kafka 失败返回 HTTP 200、`FAILED + PASS + degraded=true + resultExpected=false`。本地默认 `logging` 模式不伪造入队成功，异步请求明确降级。
 
 Kafka 消费是至少一次语义，第一版不持久化任务状态，也未加入 Redis 幂等锁。结果消费者应按 `taskId` 去重；后续可在 Worker 增加带 TTL 的幂等记录。结果发送失败只记录完整错误，符合当前允许少量放通和结果丢失的业务取舍。

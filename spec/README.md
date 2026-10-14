@@ -69,3 +69,4 @@ verification.md  Test cases and validation results
 | 031 | 管理台在线测试 | Implemented |
 | 032 | 数据库统一审计字段 | Implemented |
 | 033 | 媒资、App、场景与检测规则表 | Tables Created |
+| 034 | 管理台六表业务配置界面 | Implemented |

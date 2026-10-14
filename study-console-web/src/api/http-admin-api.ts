@@ -25,6 +25,9 @@ import type {
   OnlineTestRequest,
   OnlineTestResult,
   OnlineTestRecord,
+  ManagedResource,
+  ManagedRecord,
+  SaveManagedRecordRequest,
 } from '@/types/admin'
 
 const EMPTY_DASHBOARD: DashboardSnapshot = {
@@ -128,14 +131,51 @@ export const httpAdminApi: AdminApi = {
     )
   },
   async onlineTestProfile(contentType: DetectContentType) {
-    return unwrap((await httpClient.get<ApiEnvelope<OnlineTestProfile>>(
-      `/admin/online-tests/profiles/${contentType}`)).data)
+    return unwrap(
+      (
+        await httpClient.get<ApiEnvelope<OnlineTestProfile>>(
+          `/admin/online-tests/profiles/${contentType}`,
+        )
+      ).data,
+    )
   },
   async runOnlineTest(request: OnlineTestRequest) {
-    return unwrap((await httpClient.post<ApiEnvelope<OnlineTestResult>>(
-      '/admin/online-tests', request, { timeout: 45_000 })).data)
+    return unwrap(
+      (
+        await httpClient.post<ApiEnvelope<OnlineTestResult>>('/admin/online-tests', request, {
+          timeout: 45_000,
+        })
+      ).data,
+    )
   },
   async onlineTestRecords() {
-    return unwrap((await httpClient.get<ApiEnvelope<OnlineTestRecord[]>>('/admin/online-tests')).data)
+    return unwrap(
+      (await httpClient.get<ApiEnvelope<OnlineTestRecord[]>>('/admin/online-tests')).data,
+    )
+  },
+  async managedRecords(resource: ManagedResource) {
+    return unwrap(
+      (await httpClient.get<ApiEnvelope<ManagedRecord[]>>(`/admin/managed/${resource}`)).data,
+    )
+  },
+  async createManagedRecord(resource: ManagedResource, request: SaveManagedRecordRequest) {
+    return unwrap(
+      (await httpClient.post<ApiEnvelope<ManagedRecord>>(`/admin/managed/${resource}`, request))
+        .data,
+    )
+  },
+  async updateManagedRecord(
+    resource: ManagedResource,
+    id: number,
+    request: SaveManagedRecordRequest,
+  ) {
+    return unwrap(
+      (
+        await httpClient.put<ApiEnvelope<ManagedRecord>>(
+          `/admin/managed/${resource}/${id}`,
+          request,
+        )
+      ).data,
+    )
   },
 }

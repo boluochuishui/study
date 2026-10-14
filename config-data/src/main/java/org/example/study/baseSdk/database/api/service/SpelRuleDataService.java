@@ -32,6 +32,8 @@ public interface SpelRuleDataService {
 
     Optional<SpelRuleReleaseData> findRelease(long tenantId, String ruleSetCode, long releaseVersion);
 
+    Optional<SpelRuleReleaseData> findReleaseById(long tenantId, long releaseId);
+
     List<SpelRuleReleaseData> listLatestReleases(long tenantId, String scene);
 
     List<SpelRuleReleaseData> listReleaseChanges(long tenantId, String scene, long afterCursor, int limit);

@@ -14,6 +14,8 @@ import {
   Settings2,
   FlaskConical,
   UsersRound,
+  AppWindow,
+  Images,
 } from '@lucide/vue'
 
 import AppBrand from '@/components/AppBrand.vue'
@@ -46,12 +48,24 @@ const groups: Array<{ label: string; items: NavigationItem[] }> = [
     items: [
       { route: '/rules', label: 'nav.rules', icon: BookOpenCheck, permission: 'RULE_READ' },
       { route: '/configs', label: 'nav.configs', icon: Settings2, permission: 'CONFIG_READ' },
+      {
+        route: '/access-config',
+        label: 'nav.accessConfig',
+        icon: AppWindow,
+        permission: 'CONFIG_READ',
+      },
+      { route: '/media-config', label: 'nav.mediaConfig', icon: Images, permission: 'CONFIG_READ' },
     ],
   },
   {
     label: 'nav.operations',
     items: [
-      { route: '/online-test', label: 'nav.onlineTest', icon: FlaskConical, permission: 'TEST_RUN' },
+      {
+        route: '/online-test',
+        label: 'nav.onlineTest',
+        icon: FlaskConical,
+        permission: 'TEST_RUN',
+      },
       { route: '/logs', label: 'nav.logs', icon: FileSearch, permission: 'LOG_READ' },
     ],
   },

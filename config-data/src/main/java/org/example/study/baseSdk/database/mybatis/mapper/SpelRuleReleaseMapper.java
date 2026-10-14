@@ -13,6 +13,8 @@ public interface SpelRuleReleaseMapper extends BaseMapper<SpelRuleReleaseEntity>
     SpelRuleReleaseEntity selectByVersion(@Param("tenantId") long tenantId,
                                           @Param("ruleSetCode") String ruleSetCode,
                                           @Param("releaseVersion") long releaseVersion);
+    SpelRuleReleaseEntity selectByIdForTenant(@Param("tenantId") long tenantId,
+                                              @Param("releaseId") long releaseId);
     List<SpelRuleReleaseEntity> selectLatestByScene(@Param("tenantId") long tenantId,
                                                     @Param("scene") String scene);
     List<SpelRuleReleaseEntity> selectChanges(@Param("tenantId") long tenantId,

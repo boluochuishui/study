@@ -23,6 +23,10 @@
         WHERE tenant_id = #{tenantId} AND rule_set_code = #{ruleSetCode}
           AND release_version = #{releaseVersion} LIMIT 1
     </select>
+    <select id="selectByIdForTenant" resultMap="releaseResult">
+        SELECT <include refid="columns"/> FROM sdk_spel_rule_release
+        WHERE tenant_id = #{tenantId} AND release_id = #{releaseId} AND deleted = 0 LIMIT 1
+    </select>
     <select id="selectLatestByScene" resultMap="releaseResult">
         SELECT r.release_id, r.tenant_id, r.rule_set_code, r.release_version, r.scene, r.snapshot_json,
                r.checksum, r.deleted, r.published_by, r.published_at,

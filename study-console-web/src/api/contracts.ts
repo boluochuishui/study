@@ -22,6 +22,9 @@ import type {
   OnlineTestRequest,
   OnlineTestResult,
   OnlineTestRecord,
+  ManagedResource,
+  ManagedRecord,
+  SaveManagedRecordRequest,
 } from '@/types/admin'
 
 export interface AdminApi {
@@ -45,4 +48,14 @@ export interface AdminApi {
   onlineTestProfile(contentType: DetectContentType): Promise<OnlineTestProfile>
   runOnlineTest(request: OnlineTestRequest): Promise<OnlineTestResult>
   onlineTestRecords(): Promise<OnlineTestRecord[]>
+  managedRecords(resource: ManagedResource): Promise<ManagedRecord[]>
+  createManagedRecord(
+    resource: ManagedResource,
+    request: SaveManagedRecordRequest,
+  ): Promise<ManagedRecord>
+  updateManagedRecord(
+    resource: ManagedResource,
+    id: number,
+    request: SaveManagedRecordRequest,
+  ): Promise<ManagedRecord>
 }

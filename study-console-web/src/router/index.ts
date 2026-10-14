@@ -44,6 +44,20 @@ const routes: RouteRecordRaw[] = [
         meta: { permission: 'CONFIG_READ', titleKey: 'configs.title' },
       },
       {
+        path: 'access-config',
+        name: 'access-config',
+        component: () => import('@/views/ManagedResourcesView.vue'),
+        props: { group: 'access' },
+        meta: { permission: 'CONFIG_READ', titleKey: 'managed.access.title' },
+      },
+      {
+        path: 'media-config',
+        name: 'media-config',
+        component: () => import('@/views/ManagedResourcesView.vue'),
+        props: { group: 'media' },
+        meta: { permission: 'CONFIG_READ', titleKey: 'managed.media.title' },
+      },
+      {
         path: 'logs',
         name: 'logs',
         component: () => import('@/views/LogsView.vue'),
