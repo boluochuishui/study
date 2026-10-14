@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @TableName("sdk_spel_rule_release")
-public class SpelRuleReleaseEntity {
+public class SpelRuleReleaseEntity extends AuditedEntity {
     @TableId
     private Long releaseId;
     private Long tenantId;

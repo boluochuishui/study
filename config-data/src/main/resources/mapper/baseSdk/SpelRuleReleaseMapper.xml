@@ -8,9 +8,11 @@
         <result property="snapshotJson" column="snapshot_json"/><result property="checksum" column="checksum"/>
         <result property="deleted" column="deleted"/><result property="publishedBy" column="published_by"/>
         <result property="publishedAt" column="published_at"/>
+        <result property="createdBy" column="created_by"/><result property="updatedBy" column="updated_by"/>
+        <result property="createdAt" column="created_at"/><result property="updatedAt" column="updated_at"/>
     </resultMap>
     <sql id="columns">release_id, tenant_id, rule_set_code, release_version, scene, snapshot_json,
-        checksum, deleted, published_by, published_at</sql>
+        checksum, deleted, published_by, published_at, created_by, created_at, updated_by, updated_at</sql>
     <select id="selectByRuleSetCode" resultMap="releaseResult">
         SELECT <include refid="columns"/> FROM sdk_spel_rule_release
         WHERE tenant_id = #{tenantId} AND rule_set_code = #{ruleSetCode}
@@ -23,7 +25,8 @@
     </select>
     <select id="selectLatestByScene" resultMap="releaseResult">
         SELECT r.release_id, r.tenant_id, r.rule_set_code, r.release_version, r.scene, r.snapshot_json,
-               r.checksum, r.deleted, r.published_by, r.published_at
+               r.checksum, r.deleted, r.published_by, r.published_at,
+               r.created_by, r.created_at, r.updated_by, r.updated_at
         FROM sdk_spel_rule_release r
         INNER JOIN (SELECT rule_set_code, MAX(release_id) AS release_id FROM sdk_spel_rule_release
                     WHERE tenant_id = #{tenantId} AND scene = #{scene}

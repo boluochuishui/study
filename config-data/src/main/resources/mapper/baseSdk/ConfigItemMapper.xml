@@ -16,12 +16,14 @@
         <result property="description" column="description"/>
         <result property="deleted" column="deleted"/>
         <result property="createdAt" column="created_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <sql id="configItemColumns">
         id, tenant_id, namespace, config_key, config_value, version, enabled,
-        description, deleted, created_at, updated_at
+        description, deleted, created_by, created_at, updated_by, updated_at
     </sql>
 
     <select id="selectEnabled" resultMap="configItemResultMap">

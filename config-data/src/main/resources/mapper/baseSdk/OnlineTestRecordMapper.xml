@@ -4,26 +4,26 @@
     <resultMap id="recordMap" type="org.example.study.baseSdk.database.api.model.OnlineTestRecordData">
         <constructor>
             <idArg column="id" javaType="java.lang.Long"/>
-            <arg column="tenant_id" javaType="long"/>
-            <arg column="user_id" javaType="long"/>
+            <arg column="tenant_id" javaType="_long"/>
+            <arg column="user_id" javaType="_long"/>
             <arg column="content_type" javaType="java.lang.String"/>
             <arg column="execution_mode" javaType="java.lang.String"/>
             <arg column="app_id" javaType="java.lang.String"/>
             <arg column="scene_code" javaType="java.lang.String"/>
-            <arg column="item_count" javaType="int"/>
+            <arg column="item_count" javaType="_int"/>
             <arg column="task_id" javaType="java.lang.String"/>
             <arg column="status" javaType="java.lang.String"/>
             <arg column="result_json" javaType="java.lang.String"/>
-            <arg column="duration_ms" javaType="long"/>
+            <arg column="duration_ms" javaType="_long"/>
             <arg column="created_at" javaType="java.time.LocalDateTime"/>
         </constructor>
     </resultMap>
     <insert id="insert">
         INSERT INTO admin_online_test_record
         (tenant_id, user_id, content_type, execution_mode, app_id, scene_code, item_count,
-         task_id, status, result_json, duration_ms)
+         task_id, status, result_json, duration_ms, created_by, updated_by)
         VALUES (#{tenantId}, #{userId}, #{contentType}, #{executionMode}, #{appId}, #{sceneCode},
-                #{itemCount}, #{taskId}, #{status}, #{resultJson}, #{durationMs})
+                #{itemCount}, #{taskId}, #{status}, #{resultJson}, #{durationMs}, #{userId}, #{userId})
     </insert>
     <select id="selectRecent" resultMap="recordMap">
         SELECT id, tenant_id, user_id, content_type, execution_mode, app_id, scene_code,

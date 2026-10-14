@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.example.study.baseSdk.database.mybatis.mapper.AdminSecurityMapper">
+    <sql id="auditActor">
+        <bind name="auditActor" value="@org.example.study.baseSdk.database.api.audit.DatabaseAuditContext@actorId()"/>
+    </sql>
     <resultMap id="userResult" type="org.example.study.baseSdk.database.mybatis.entity.AdminUserEntity">
         <id property="id" column="id"/>
         <result property="tenantId" column="tenant_id"/>
@@ -48,11 +51,13 @@
         ORDER BY p.permission_code
     </select>
     <insert id="insertAccessToken">
-        INSERT INTO admin_access_token (tenant_id, user_id, token_hash, expires_at, revoked)
-        VALUES (#{tenantId}, #{userId}, #{tokenHash}, #{expiresAt}, 0)
+        INSERT INTO admin_access_token (tenant_id, user_id, token_hash, expires_at, revoked, created_by, updated_by)
+        VALUES (#{tenantId}, #{userId}, #{tokenHash}, #{expiresAt}, 0, #{userId}, #{userId})
     </insert>
     <update id="revokeAccessToken">
-        UPDATE admin_access_token SET revoked = 1 WHERE token_hash = #{tokenHash} AND revoked = 0
+        <include refid="auditActor"/>
+        UPDATE admin_access_token SET revoked = 1, updated_by = #{auditActor}, updated_at = CURRENT_TIMESTAMP(3)
+        WHERE token_hash = #{tokenHash} AND revoked = 0
     </update>
     <select id="countUsers" resultType="long">
         SELECT COUNT(*) FROM admin_user u JOIN admin_tenant t ON t.id = u.tenant_id
@@ -60,8 +65,9 @@
     </select>
     <insert id="insertUser" parameterType="org.example.study.baseSdk.database.mybatis.entity.AdminUserEntity"
             useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO admin_user (tenant_id, username, display_name, password_hash, enabled)
-        VALUES (#{tenantId}, #{username}, #{displayName}, #{passwordHash}, 1)
+        <include refid="auditActor"/>
+        INSERT INTO admin_user (tenant_id, username, display_name, password_hash, enabled, created_by, updated_by)
+        VALUES (#{tenantId}, #{username}, #{displayName}, #{passwordHash}, 1, #{auditActor}, #{auditActor})
     </insert>
     <select id="selectUsers" resultMap="userResult">
         SELECT u.id, u.tenant_id, t.tenant_code, u.username, u.display_name, u.password_hash, u.enabled
@@ -80,9 +86,11 @@
         SELECT permission_code, permission_name FROM admin_permission ORDER BY permission_code
     </select>
     <insert id="upsertRole">
-        INSERT INTO admin_role (tenant_id, role_code, role_name, enabled)
-        VALUES (#{tenantId}, #{roleCode}, #{roleName}, #{enabled})
-        ON DUPLICATE KEY UPDATE role_name = #{roleName}, enabled = #{enabled}
+        <include refid="auditActor"/>
+        INSERT INTO admin_role (tenant_id, role_code, role_name, enabled, created_by, updated_by)
+        VALUES (#{tenantId}, #{roleCode}, #{roleName}, #{enabled}, #{auditActor}, #{auditActor})
+        ON DUPLICATE KEY UPDATE role_name = #{roleName}, enabled = #{enabled},
+                                updated_by = #{auditActor}, updated_at = CURRENT_TIMESTAMP(3)
     </insert>
     <delete id="deleteRolePermissions">
         DELETE rp FROM admin_role_permission rp
@@ -90,8 +98,9 @@
         WHERE r.tenant_id = #{tenantId} AND r.role_code = #{roleCode}
     </delete>
     <insert id="insertRolePermissionByCode">
-        INSERT INTO admin_role_permission (role_id, permission_id)
-        SELECT r.id, p.id FROM admin_role r JOIN admin_permission p
+        <include refid="auditActor"/>
+        INSERT INTO admin_role_permission (role_id, permission_id, created_by, updated_by)
+        SELECT r.id, p.id, #{auditActor}, #{auditActor} FROM admin_role r JOIN admin_permission p
         WHERE r.tenant_id = #{tenantId} AND r.role_code = #{roleCode}
           AND p.permission_code = #{permissionCode}
     </insert>
@@ -105,8 +114,9 @@
         DELETE FROM admin_user_role WHERE tenant_id = #{tenantId} AND user_id = #{userId}
     </delete>
     <insert id="insertUserRoleByCode">
-        INSERT INTO admin_user_role (tenant_id, user_id, role_id)
-        SELECT #{tenantId}, #{userId}, r.id FROM admin_role r
+        <include refid="auditActor"/>
+        INSERT INTO admin_user_role (tenant_id, user_id, role_id, created_by, updated_by)
+        SELECT #{tenantId}, #{userId}, r.id, #{auditActor}, #{auditActor} FROM admin_role r
         WHERE r.tenant_id = #{tenantId} AND r.role_code = #{roleCode} AND r.enabled = 1
     </insert>
     <select id="selectTenantId" resultType="java.lang.Long">

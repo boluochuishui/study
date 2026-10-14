@@ -67,3 +67,5 @@ verification.md  Test cases and validation results
 | 029 | 鉴权模块迁移至 Base SDK | Implemented |
 | 030 | Base SDK 通用脱敏能力 | Implemented |
 | 031 | 管理台在线测试 | Implemented |
+| 032 | 数据库统一审计字段 | Implemented |
+| 033 | 媒资、App、场景与检测规则表 | Tables Created |

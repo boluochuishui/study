@@ -12,6 +12,7 @@ import org.example.study.admin.api.AdminLocale;
 import org.example.study.admin.api.AdminResponse;
 import org.example.study.admin.service.AdminTokenService;
 import org.example.study.baseSdk.database.api.model.AdminIdentityData;
+import org.example.study.baseSdk.database.api.audit.DatabaseAuditContext;
 import org.example.study.baseSdk.database.api.service.AdminSecurityDataService;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
@@ -56,7 +57,7 @@ public class AdminAuthenticationFilter extends OncePerRequestFilter {
         }
         AdminSecurityContext.set(new AdminPrincipal(identity.userId(), identity.tenantId(), identity.tenantCode(),
                 identity.username(), identity.displayName(), tokenHash, identity.permissions()));
-        try {
+        try (var auditScope = DatabaseAuditContext.open(identity.userId())) {
             chain.doFilter(request, response);
         } finally {
             AdminSecurityContext.clear();
