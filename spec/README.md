@@ -71,3 +71,4 @@ verification.md  Test cases and validation results
 | 033 | 媒资、App、场景与检测规则表 | Tables Created |
 | 034 | 管理台六表业务配置界面 | Implemented |
 | 035 | 管理台 Docker 与 Kubernetes 部署 | Implemented |
+| 036 | 子模块 Maven 根目录定位 | Implemented |

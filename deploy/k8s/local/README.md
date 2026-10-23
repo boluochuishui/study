@@ -8,6 +8,8 @@
 
 ## 一键部署
 
+各服务单独构建、更新、重启以及停止后重新启动的命令，见 [项目根 README](../../../README.md)。所有命令均在包含根 `pom.xml` 的目录执行。
+
 在项目根目录运行：
 
 ```powershell
@@ -15,6 +17,10 @@ powershell -ExecutionPolicy Bypass -File deploy/k8s/local/deploy-local.ps1
 ```
 
 脚本会执行 Maven 打包、构建七个本地镜像、创建本地 Secret、应用清单并等待所有 Deployment 就绪。重建镜像后自动滚动重启应用，确保固定的 `local` 标签使用最新镜像。已有镜像时可增加 `-SkipBuild`，此选项不会主动重启未改变的工作负载。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File deploy/k8s/local/deploy-local.ps1 -SkipBuild
+```
 
 ## 打开管理台
 
