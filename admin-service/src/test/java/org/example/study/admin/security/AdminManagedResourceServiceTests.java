@@ -13,6 +13,8 @@ import org.example.study.baseSdk.database.api.service.SpelRuleDataService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -72,6 +74,28 @@ class AdminManagedResourceServiceTests {
                 "content_type", "TEXT", "rule_type", "LLM", "execution_mode", "SYNC",
                 "on_hit_action", "REVIEW", "parameters_json", "{}"))))
                 .isInstanceOf(AdminApiException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {-1, 1.5, 2147483648.0, Double.NaN, Double.POSITIVE_INFINITY})
+    void rejectsInvalidNumericPriorities(double priority) {
+        when(data.find(7, ManagedResource.SCENES, 3)).thenReturn(Map.of("id", 3L, "enabled", 1));
+        assertThatThrownBy(() -> service.create("rules", request(0, Map.of(
+                "scene_id", 3L, "rule_code", "keyword", "rule_name", "Keyword",
+                "content_type", "TEXT", "rule_type", "KEYWORD", "execution_mode", "BOTH",
+                "on_hit_action", "REJECT", "parameters_json", "{}", "priority", priority))))
+                .isInstanceOf(AdminApiException.class);
+    }
+
+    @Test
+    void acceptsZeroPriorityAndIntegralReference() {
+        when(data.find(7, ManagedResource.SCENES, 3)).thenReturn(Map.of("id", 3L, "enabled", 1));
+        service.create("rules", request(0, Map.of(
+                "scene_id", 3L, "rule_code", "keyword", "rule_name", "Keyword",
+                "content_type", "TEXT", "rule_type", "KEYWORD", "execution_mode", "BOTH",
+                "on_hit_action", "REJECT", "parameters_json", "{}", "priority", 0)));
+        verify(data).create(org.mockito.ArgumentMatchers.eq(7L),
+                org.mockito.ArgumentMatchers.eq(ManagedResource.RULES), anyMap());
     }
 
     @Test

@@ -102,19 +102,20 @@ public class AdminManagedResourceService {
                 value = (Boolean) value ? 1 : 0;
             } else if (column.equals("priority") || Set.of("app_record_id", "scene_id", "library_id",
                     "asset_id", "media_library_id", "spel_release_id").contains(column)) {
-                if (value != null && !(value instanceof Number)) {
-                    throw invalid();
-                }
-                if (value instanceof Number number && (!Double.isFinite(number.doubleValue())
-                        || number.doubleValue() != number.longValue())) {
-                    throw invalid();
-                }
-                if (value != null && ((Number) value).longValue() < 1 && !column.equals("priority")) {
-                    throw invalid();
-                }
-                if (column.equals("priority") && value instanceof Number number
-                        && (number.longValue() < 0 || number.longValue() > Integer.MAX_VALUE)) {
-                    throw invalid();
+                if (value != null) {
+                    if (!(value instanceof Number number)) {
+                        throw invalid();
+                    }
+                    if (!Double.isFinite(number.doubleValue()) || number.doubleValue() != number.longValue()) {
+                        throw invalid();
+                    }
+                    if (column.equals("priority")) {
+                        if (number.longValue() < 0 || number.longValue() > Integer.MAX_VALUE) {
+                            throw invalid();
+                        }
+                    } else if (number.longValue() < 1) {
+                        throw invalid();
+                    }
                 }
             } else if (column.endsWith("_json")) {
                 value = checkedJson(column, value);

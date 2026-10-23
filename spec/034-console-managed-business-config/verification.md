@@ -1,5 +1,14 @@
 # 验证记录
 
+## SpotBugs 修正回归
+
+- `SaveManagedResourceRequest` 在 setter/getter 两端拷贝顶层 Map，保留允许清空字段的 null 值；不使用拒绝 null 的 `Map.copyOf`。
+- 数字字段只进行一次 Number 类型判断，再执行有限数、整数和范围检查，移除重复 `instanceof`。
+- `mvn -pl admin-service -am test '-Dtest=SaveManagedResourceRequestTests,AdminManagedResourceServiceTests' '-Dsurefire.failIfNoSpecifiedTests=false'`：13 个测试通过，Checkstyle 通过。
+- `mvn -f admin-service/pom.xml spotbugs:check`：BugInstance=0、Error=0，BUILD SUCCESS。未增加 SpotBugs 排除规则。
+
+## 原功能验证
+
 - `mvn -pl admin-service -am test`：后端现有测试与新表单单元测试。
 - `mvn -pl admin-service -am test '-Dtest=ManagedResourceIntegrationTests' '-Dsurefire.failIfNoSpecifiedTests=false' '-Dmanaged.integration.enabled=true'`：使用本机 MySQL 执行六表创建、编辑、审计、跨租户及版本冲突测试；事务回滚。
 - `mvn -pl admin-service -am checkstyle:check`：代码风格。
