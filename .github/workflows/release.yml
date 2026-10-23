@@ -67,6 +67,44 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: study-console-web/package-lock.json
+
+      - name: Verify console
+        working-directory: study-console-web
+        env:
+          VITE_ENABLE_MOCK: "false"
+          VITE_APP_ENV: production
+        run: |
+          npm ci
+          npm run lint
+          npm run test
+          npm run build
+
+      - name: Upload console static assets
+        uses: actions/upload-artifact@v7
+        with:
+          name: study-console-web-${{ inputs.version }}
+          path: study-console-web/dist/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Build console Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: study-console-web
+          file: study-console-web/Dockerfile
+          push: false
+          tags: study-console-web:${{ inputs.version }}
+          build-args: |
+            VITE_APP_ENV=production
+          cache-from: type=gha,scope=console
+          cache-to: type=gha,mode=max,scope=console
+
       - name: Build Docker image
         uses: docker/build-push-action@v7
         with:

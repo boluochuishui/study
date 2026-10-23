@@ -6,3 +6,4 @@ resources:
   - infrastructure.yaml
   - binary-storage.yaml
   - services.yaml
+  - console.yaml

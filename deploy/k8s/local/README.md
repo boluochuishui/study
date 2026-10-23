@@ -1,6 +1,6 @@
 # 本地 Kubernetes 部署
 
-本目录用于把检测运行面部署到 Docker Desktop Kubernetes，包括接入服务、音视文图四个检测服务、MySQL 和 Redis。服务间 RPC 通过 Kubernetes Service DNS 直连；本地环境暂不启用 Nacos、Kafka、大模型检测和 SpEL 规则热加载。
+本目录用于把检测运行面和管理台部署到 Docker Desktop Kubernetes，包括接入服务、音视文图四个检测服务、管理服务、前端 Nginx、MySQL 和 Redis。服务间 RPC 通过 Kubernetes Service DNS 直连；本地环境暂不启用 Nacos、Kafka、大模型检测和 SpEL 规则热加载。
 
 首次使用、更新发布、验证和排障的完整说明请阅读 [023 本地 Kubernetes 部署操作手册](../../../spec/023-local-kubernetes-operation-guide/operation-guide.md)。
 
@@ -14,7 +14,17 @@
 powershell -ExecutionPolicy Bypass -File deploy/k8s/local/deploy-local.ps1
 ```
 
-脚本会执行 Maven 打包、构建五个本地镜像、创建本地 Secret、应用清单并等待所有 Deployment 就绪。已有镜像时可增加 `-SkipBuild`。
+脚本会执行 Maven 打包、构建七个本地镜像、创建本地 Secret、应用清单并等待所有 Deployment 就绪。重建镜像后自动滚动重启应用，确保固定的 `local` 标签使用最新镜像。已有镜像时可增加 `-SkipBuild`，此选项不会主动重启未改变的工作负载。
+
+## 打开管理台
+
+部署成功后访问 `http://localhost:30088`，租户填 `default`，用户名填 `admin`。首次部署自动生成独立的管理员引导密码，读取命令：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File deploy/k8s/local/get-admin-password.ps1
+```
+
+重复部署复用 Secret 中的引导密码，不修改数据库中已有用户密码。前端镜像关闭 Mock，`/api` 由 Nginx 代理到集群里的 `admin-service:8081`。详细步骤见 [035 管理台 Docker/K8s 部署](../../../spec/035-console-docker-kubernetes/operation-guide.md)。
 
 ## 验证文本检测
 

@@ -6,6 +6,9 @@ spec
 config
 *.iml
 *.log
+study-console-web/node_modules
+study-console-web/dist
+study-console-web/coverage
 **/target/*
 !access-service/target/*.jar
 !text-detect-service/target/*.jar

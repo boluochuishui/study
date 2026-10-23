@@ -1,0 +1,195 @@
+# 管理服务等待接入服务完成数据库迁移后启动。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-service
+  namespace: content-risk
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: admin-service
+  template:
+    metadata:
+      labels:
+        app: admin-service
+    spec:
+      terminationGracePeriodSeconds: 120
+      initContainers:
+        - name: wait-for-schema
+          image: content-risk/admin-service:local
+          imagePullPolicy: Never
+          command:
+            - sh
+            - -c
+            - until wget -q -T 5 -O /dev/null http://access-service:8080/internal/lifecycle/ready; do sleep 2; done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      containers:
+        - name: application
+          image: content-risk/admin-service:local
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: content-risk-config
+          env:
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: MYSQL_PASSWORD
+            - name: ADMIN_BOOTSTRAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: ADMIN_BOOTSTRAP_PASSWORD
+            - name: SERVICE_DRAIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: SERVICE_DRAIN_TOKEN
+            - name: ONLINE_TEST_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: AUTH_APP_ID
+            - name: ONLINE_TEST_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: content-risk-local-secret
+                  key: AUTH_APP_SECRET
+            - name: ONLINE_TEST_ACCESS_URL
+              value: http://access-service:8080
+            # 管理服务不挂载检测样本 PVC，基础 SDK 的临时目录使用可写路径。
+            - name: DETECT_FILE_ROOT
+              value: /tmp/admin-detection-files
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - >-
+                    wget -q -T 5 -O -
+                    --header="X-Drain-Token: $SERVICE_DRAIN_TOKEN"
+                    --post-data='' http://127.0.0.1:8081/internal/lifecycle/drain;
+                    sleep 5
+          startupProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 90
+          readinessProbe:
+            httpGet:
+              path: /internal/lifecycle/ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /internal/lifecycle/live
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+  namespace: content-risk
+spec:
+  selector:
+    app: admin-service
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: study-console-web
+  namespace: content-risk
+spec:
+  replicas: 1
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: study-console-web
+  template:
+    metadata:
+      labels:
+        app: study-console-web
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: nginx
+          image: content-risk/study-console-web:local
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 80
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: study-console-web
+  namespace: content-risk
+spec:
+  type: NodePort
+  selector:
+    app: study-console-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30088

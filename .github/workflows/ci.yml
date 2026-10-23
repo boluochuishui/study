@@ -14,6 +14,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  console-quality:
+    name: Console lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: study-console-web
+    env:
+      VITE_ENABLE_MOCK: "false"
+      VITE_APP_ENV: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: study-console-web/package-lock.json
+      - name: Install console dependencies
+        run: npm ci
+      - name: Verify console
+        run: |
+          npm run lint
+          npm run test
+          npm run build
+
   quality-gate:
     name: Test and quality gate
     runs-on: ubuntu-latest

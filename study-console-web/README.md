@@ -54,10 +54,11 @@ npm run build
 
 ```powershell
 docker build -t content-risk/study-console-web:local .
-docker run --rm -p 8088:80 content-risk/study-console-web:local
 ```
 
-容器中的 Nginx 默认将 `/api` 代理到 `admin-service:8081`，适合部署到与管理服务相同的 Kubernetes 命名空间。
+容器中的 Nginx 默认将 `/api` 代理到 `admin-service:8081`，需与管理服务位于可解析该名称的容器网络或 Kubernetes 命名空间。单独运行前端容器而没有管理服务时，Nginx 可能因上游名称无法解析而启动失败。
+
+项目已将前端和管理服务加入根目录的一键 K8s 部署脚本，部署后访问 `http://localhost:30088`。操作步骤和密码读取方式见 [035 管理台部署说明](../spec/035-console-docker-kubernetes/operation-guide.md)。前端镜像固定关闭 Mock，连接真实管理 API。
 
 ## 目录
 
